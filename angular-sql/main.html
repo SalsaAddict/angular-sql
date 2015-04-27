@@ -1,0 +1,49 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-gb" ng-app="angular-sql">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta http-equiv="cache-control" content="max-age=0" />
+    <meta http-equiv="cache-control" content="no-cache" />
+    <meta http-equiv="expires" content="0" />
+    <meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />
+    <meta http-equiv="pragma" content="no-cache" />
+    <title>Claimsuite</title>
+    <link rel="stylesheet" href="Content/bootstrap.yeti.min.css" />
+    <link rel="stylesheet" href="Content/font-awesome.min.css" />
+    <link rel="stylesheet" href="Content/angular-ui.css" />
+</head>
+<body>
+    <nav class="navbar navbar-default navbar-fixed-top">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" ng-click="navBarCollapsed = !navBarCollapsed">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a href class="navbar-brand">Claimsuite</a>
+            </div>
+            <div class="collapse navbar-collapse" collapse="navBarCollapsed">
+                <ul class="nav navbar-nav" ng-show="loggedIn()">
+                    <li><a href="#/home">Home</a></li>
+                    <li><a href="#/entities">Entities</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li ng-hide="loggedIn()"><a href ng-click="login()">Login</a></li>
+                    <li ng-show="loggedIn()"><a href ng-click="logout()">Logout</a></li>
+                </ul>
+
+            </div>
+        </div>
+    </nav>
+    <div class="container"><ng-view></ng-view></div>
+    <script src="Scripts/angular.min.js"></script>
+    <script src="Scripts/angular-route.min.js"></script>
+    <script src="Scripts/angular-ui/ui-bootstrap-tpls.min.js"></script>
+    <script src="Scripts/angular-sql/app.js"></script>
+</body>
+</html>

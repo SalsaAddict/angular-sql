@@ -1,0 +1,6 @@
+C:\Users\Pierre\Documents\GitHub\angular-sql\angular-sql\bin\angular-sql.dll.config
+C:\Users\Pierre\Documents\GitHub\angular-sql\angular-sql\bin\angular-sql.dll
+C:\Users\Pierre\Documents\GitHub\angular-sql\angular-sql\bin\angular-sql.pdb
+C:\Users\Pierre\Documents\GitHub\angular-sql\angular-sql\obj\Debug\angular-sql.csprojResolveAssemblyReference.cache
+C:\Users\Pierre\Documents\GitHub\angular-sql\angular-sql\obj\Debug\angular-sql.dll
+C:\Users\Pierre\Documents\GitHub\angular-sql\angular-sql\obj\Debug\angular-sql.pdb

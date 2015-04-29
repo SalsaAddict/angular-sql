@@ -1,7 +1,11 @@
 ﻿using JWT;
 using System;
+using System.Data;
+using System.Data.SqlClient;
 using System.Security.Cryptography;
 using System.Web.Configuration;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace AngularSql
 {
@@ -11,7 +15,7 @@ namespace AngularSql
         private static int SaltLength = 32;
         private static int HashLength = 32;
         private static int IterationCount = 1024;
-        private static string JsonWebTokenKey = "3dd!370rr3$7h3M@mb0K!ngFr0mN3wY0rk";
+        private static string JsonWebTokenKey = "GQDstcKsx0NHjPOuXOYg5MbeJ1XT0uFiwDVvVBrk";
 
         private static byte[] GenerateSalt()
         {
@@ -52,12 +56,32 @@ namespace AngularSql
 
         public static string TokenFromUserId(int UserId)
         {
-            return JsonWebToken.Encode(new JsonWebTokenPayload(UserId), JsonWebTokenKey, JwtHashAlgorithm.HS512);
+            //JsonWebTokenPayload Payload = new JsonWebTokenPayload();
+            //Payload.UserId = UserId;
+            Dictionary<string, object> Payload = new Dictionary<string, object>() { { "UserId", UserId } };
+            string Token = JsonWebToken.Encode(Payload, JsonWebTokenKey, JwtHashAlgorithm.HS256);
+            return Token;
         }
 
         public static int UserIdFromToken(string Token)
         {
             return (JsonWebToken.DecodeToObject(Token, JsonWebTokenKey, true) as JsonWebTokenPayload).UserId;
+        }
+
+        public static void VerifyUser(string Token, bool IgnoreTimeout = false)
+        {
+            using (SqlConnection Connection = new SqlConnection(WebConfigurationManager.ConnectionStrings["Database"].ConnectionString))
+            {
+                Connection.Open();
+                using (SqlCommand Command = new SqlCommand("apiUserVerify", Connection))
+                {
+                    Command.CommandType = CommandType.StoredProcedure;
+                    Command.Parameters.AddWithValue("UserId", UserIdFromToken(Token));
+                    if (!IgnoreTimeout) Command.Parameters.AddWithValue("Timeout", Convert.ToByte(WebConfigurationManager.AppSettings["LoginTimeout"]));
+                    Command.ExecuteNonQuery();
+                }
+                Connection.Close();
+            }
         }
 
     }

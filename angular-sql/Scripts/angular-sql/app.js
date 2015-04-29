@@ -6,3 +6,14 @@ app.config(["$logProvider", "$routeProvider", function ($logProvider, $routeProv
         .when("/home", { caseInsensitiveMatch: true, templateUrl: "views/home.html" })
         .otherwise({ redirectTo: "/home" });
 }]);
+
+app.run(["$rootScope", "$modal", function ($rootScope, $modal) {
+
+    $rootScope.Login = function () {
+        var LoginModal = $modal.open({
+            templateUrl: "LoginForm.html",
+            controller: "LoginController"
+        });
+    };
+
+}]);

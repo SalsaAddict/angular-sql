@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using Newtonsoft.Json;
+using System;
 using System.Data;
 using System.Data.SqlClient;
+using System.Web;
 using System.Web.Configuration;
 
 namespace AngularSql
@@ -17,44 +16,30 @@ namespace AngularSql
             LoginRequest Request; LoginResponse Response = null;
             try
             {
-                if (!LoginRequest.TryParse(Context.Request, out Request)) throw new InvalidCastException("asql:Invalid login request");
+                if (!LoginRequest.TryParse(Context, out Request)) throw new InvalidCastException("asql:401:Invalid login request.");
                 using (SqlConnection Connection = new SqlConnection(WebConfigurationManager.ConnectionStrings["Database"].ConnectionString))
                 {
                     Connection.Open();
-                    using (SqlTransaction Transaction = Connection.BeginTransaction(IsolationLevel.ReadUncommitted))
+                    using (SqlCommand Command = new SqlCommand("apiUserLogin", Connection))
                     {
-                        try
+                        Command.CommandType = CommandType.StoredProcedure;
+                        Command.Parameters.AddWithValue("Email", Request.Email);
+                        using (SqlDataReader Reader = Command.ExecuteReader(CommandBehavior.SingleRow))
                         {
-                            using (SqlCommand Command = new SqlCommand())
-                            {
-                                Command.Connection = Connection;
-                                Command.Transaction = Transaction;
-                                Command.CommandType = CommandType.StoredProcedure;
-                                Command.CommandText = "apiUserLogin";
-                                Command.Parameters.AddWithValue("Email", Request.Email);
-                                using (SqlDataReader Reader = Command.ExecuteReader(CommandBehavior.SingleRow))
-                                {
-                                    if (Reader.HasRows)
-                                        if (Reader.Read())
-                                            if (Security.VerifyPassword(Request.Password, Reader.GetString(0)))
-                                                Response = new LoginResponse(Reader.GetInt32(1));
-                                }
-                            }
-                            Transaction.Commit();
-                        }
-                        catch (SqlException Exception) { 
-                            Transaction.Rollback();
-                            throw Exception;
+                            if (Reader.HasRows)
+                                if (Reader.Read())
+                                    if (Security.VerifyPassword(Request.Password, Reader.GetString(1)))
+                                        Response = new LoginResponse(Reader.GetInt32(0));
                         }
                     }
+                    if (Response == null) throw new UnauthorizedAccessException("asql:401:Invalid email address or password.");
+                    Security.VerifyUser(Response.Token, true);
                     Connection.Close();
                 }
-
+                Context.Response.ContentType = "text/json";
+                Context.Response.Write(JsonConvert.SerializeObject(Response, Newtonsoft.Json.Formatting.Indented));
             }
-            catch (Exception Ex) { Response = new LoginResponse(Logging.Log("Login", Ex.Message)); }
-            if (Response == null) Response = new LoginResponse(Logging.Log("Login", "No response."));
-            Context.Response.ContentType = "text/plain";
-            Context.Response.Write("Hello World");
+            catch (Exception Exception) { Logging.LogError(Context, null, Exception); }
         }
 
         public bool IsReusable { get { return false; } }

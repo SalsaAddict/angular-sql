@@ -64,9 +64,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="scripts\angular-sql\LoginController.js" />
+    <Content Include="scripts\angular-sql\Procedure.js" />
+    <Content Include="scripts\ngStorage.min.js" />
     <Content Include="scripts\angular.min.js.map" />
     <Content Include="packages.config" />
     <Content Include="scripts\angular-route.min.js.map" />
+    <Content Include="exec.ashx" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -115,23 +118,27 @@
     <Content Include="scripts\jquery-1.9.1.js" />
     <Content Include="scripts\jquery-1.9.1.min.js" />
     <Content Include="scripts\npm.js" />
+    <Content Include="views\binders.html" />
+    <Content Include="views\exec.html" />
     <Content Include="views\home.html" />
     <Content Include="Web.config" />
     <Content Include="scripts\jquery-1.9.1.min.map" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="cs\JsonWebTokenPayload.cs" />
     <Compile Include="encrypt.ashx.cs">
       <DependentUpon>encrypt.ashx</DependentUpon>
     </Compile>
     <Compile Include="cs\Logging.cs" />
+    <Compile Include="exec.ashx.cs">
+      <DependentUpon>exec.ashx</DependentUpon>
+    </Compile>
     <Compile Include="login.ashx.cs">
       <DependentUpon>login.ashx</DependentUpon>
     </Compile>
     <Compile Include="cs\LoginRequest.cs" />
     <Compile Include="cs\LoginResponse.cs" />
     <Compile Include="cs\Parameter.cs" />
-    <Compile Include="Procedure.cs" />
+    <Compile Include="cs\Procedure.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="cs\Security.cs" />
   </ItemGroup>

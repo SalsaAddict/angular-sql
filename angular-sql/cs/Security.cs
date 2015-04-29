@@ -56,8 +56,6 @@ namespace AngularSql
 
         public static string TokenFromUserId(int UserId)
         {
-            //JsonWebTokenPayload Payload = new JsonWebTokenPayload();
-            //Payload.UserId = UserId;
             Dictionary<string, object> Payload = new Dictionary<string, object>() { { "UserId", UserId } };
             string Token = JsonWebToken.Encode(Payload, JsonWebTokenKey, JwtHashAlgorithm.HS256);
             return Token;
@@ -65,7 +63,8 @@ namespace AngularSql
 
         public static int UserIdFromToken(string Token)
         {
-            return (JsonWebToken.DecodeToObject(Token, JsonWebTokenKey, true) as JsonWebTokenPayload).UserId;
+            var Payload = JsonWebToken.DecodeToObject(Token, JsonWebTokenKey, true) as IDictionary<string, object>;
+            return Convert.ToInt32(Payload["UserId"]);
         }
 
         public static void VerifyUser(string Token, bool IgnoreTimeout = false)

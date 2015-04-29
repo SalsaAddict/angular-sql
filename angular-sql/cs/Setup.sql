@@ -101,4 +101,9 @@ BEGIN
 END
 GO
 
+SELECT * FROM [User]
 SELECT * FROM ErrorLog
+   at AngularSql.Security.UserIdFromToken(String Token) in \\psf\home\Desktop\GitHub\angular-sql\angular-sql\cs\Security.cs:line 68
+   at AngularSql.Security.VerifyUser(String Token, Boolean IgnoreTimeout) in \\psf\home\Desktop\GitHub\angular-sql\angular-sql\cs\Security.cs:line 79
+   at AngularSql.Login.ProcessRequest(HttpContext Context) in \\psf\home\Desktop\GitHub\angular-sql\angular-sql\login.ashx.cs:line 36
+

@@ -17,7 +17,7 @@ namespace AngularSql
         public string Name { get; set; }
 
         [JsonProperty("Parameters")]
-        public List<Parameter> Parameters { get; set; }
+        public List<UiParameter> Parameters { get; set; }
 
         [JsonProperty("Type")]
         public string Type { get; set; }
@@ -25,14 +25,14 @@ namespace AngularSql
         [JsonProperty("UserId")]
         public int UserId { get { try { return Security.UserIdFromToken(this.Token); } catch { return -1; } } }
 
-        public static bool TryParse(HttpRequest Request, out LoginRequest Result)
+        public static bool TryParse(HttpContext Context, out Procedure Result)
         {
             Result = null;
             try
             {
-                using (StreamReader Reader = new StreamReader(Request.InputStream, Encoding.UTF8))
+                using (StreamReader Reader = new StreamReader(Context.Request.InputStream, Encoding.UTF8))
                 {
-                    Result = JsonConvert.DeserializeObject<LoginRequest>(Reader.ReadToEnd());
+                    Result = JsonConvert.DeserializeObject<Procedure>(Reader.ReadToEnd());
                     return true;
                 }
             }

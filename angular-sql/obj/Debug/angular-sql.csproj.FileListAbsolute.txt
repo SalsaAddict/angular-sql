@@ -10,9 +10,9 @@ C:\Users\Pierre\Documents\GitHub\angular-sql\angular-sql\bin\Newtonsoft.Json.xml
 \\psf\Home\Desktop\GitHub\angular-sql\angular-sql\bin\angular-sql.dll.config
 \\psf\Home\Desktop\GitHub\angular-sql\angular-sql\bin\angular-sql.dll
 \\psf\Home\Desktop\GitHub\angular-sql\angular-sql\bin\angular-sql.pdb
-\\psf\Home\Desktop\GitHub\angular-sql\angular-sql\bin\JWT.dll
 \\psf\Home\Desktop\GitHub\angular-sql\angular-sql\bin\Newtonsoft.Json.dll
 \\psf\Home\Desktop\GitHub\angular-sql\angular-sql\bin\Newtonsoft.Json.xml
 \\psf\Home\Desktop\GitHub\angular-sql\angular-sql\obj\Debug\angular-sql.dll
 \\psf\Home\Desktop\GitHub\angular-sql\angular-sql\obj\Debug\angular-sql.pdb
+\\psf\Home\Desktop\GitHub\angular-sql\angular-sql\bin\JWT.dll
 \\psf\Home\Desktop\GitHub\angular-sql\angular-sql\obj\Debug\angular-sql.csprojResolveAssemblyReference.cache

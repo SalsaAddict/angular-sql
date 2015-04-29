@@ -1,0 +1,46 @@
+﻿<form class="form-horizontal">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h5>Execute</h5>
+        </div>
+        <div class="panel-body">
+            <div class="form-group">
+                <label for="Name" class="control-label col-sm-3">Name</label>
+                <div class="col-sm-9">
+                    <input type="text" class="form-control" id="Name" ng-model="$ls.Input.Name" placeholder="Stored Procedure Name" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="Handler" class="control-label col-sm-3">Type</label>
+                <div class="col-sm-9">
+                    <select class="form-control" ng-model="$ls.Input.Type">
+                        <option value="singleton">Singleton</option>
+                        <option value="array">Array</option>
+                        <option value="object">Object</option>
+                        <option value="execute">Execute Only</option>
+                    </select>
+                </div>
+            </div>
+            <div ng-repeat="Parameter in $ls.Input.Parameters" class="form-group">
+                <div class="col-sm-3">
+                    <input type="text" class="form-control" ng-model="Parameter.Name" placeholder="Parameter Name" />
+                </div>
+                <div class="col-sm-9">
+                    <div class="input-group">
+                        <input type="text" class="form-control" ng-model="Parameter.Value" placeholder="Parameter Value" />
+                        <span class="input-group-btn">
+                            <button class="btn btn-danger" ng-click="$ls.Input.Parameters.splice($ls.Input.Parameters.indexOf(Parameter), 1)">Remove</button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel-footer">
+            <button class="btn btn-primary" ng-click="$ls.Input.Parameters.push({ Name: '', Value: '' })">Add Parameter</button>
+            <button class="btn btn-success" ng-click="Exec()">Execute</button>
+        </div>
+    </div>
+
+</form>
+<pre>{{$ls.Input}}</pre>
+<pre>{{Output}}</pre>

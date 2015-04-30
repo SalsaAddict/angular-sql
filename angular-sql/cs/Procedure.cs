@@ -10,20 +10,20 @@ namespace AngularSql
     public class Procedure
     {
 
-        [JsonProperty("Token")]
-        public string Token { get; set; }
-
         [JsonProperty("Name")]
         public string Name { get; set; }
 
         [JsonProperty("Parameters")]
-        public List<UiParameter> Parameters { get; set; }
+        public List<Parameter> Parameters { get; set; }
+
+        [JsonProperty("UserId")]
+        public bool UserId { get; set; }
 
         [JsonProperty("Type")]
         public string Type { get; set; }
 
-        [JsonProperty("UserId")]
-        public int UserId { get { try { return Security.UserIdFromToken(this.Token); } catch { return -1; } } }
+        [JsonProperty("Token")]
+        public string Token { get; set; }
 
         public static bool TryParse(HttpContext Context, out Procedure Result)
         {

@@ -1,21 +1,28 @@
-﻿app.controller("LoginController", ["$scope", "$http", "$modalInstance", "Message", function ($scope, $http, $modalInstance, Message) {
+﻿app.controller("LoginController",
+    ["$scope", "$http", "$modalInstance", "Message", "Success", "Failure",
+    function ($scope, $http, $modalInstance, Message, Success, Failure) {
 
-    $scope.Message = Message;
+        $scope.Message = Message;
 
-    $scope.Login = function () {
-        $http.post("login.ashx", { Email: $scope.$ls.Email, Password: $scope.Password })
-            .success(function (Data) {
-                $scope.$ls.Token = Data.Token;
-                $modalInstance.close();
-            })
-            .error(function (Response) {
-                $scope.$ls.Token = null;
-                $scope.Message = Response;
-            });
-    };
+        $scope.Login = function () {
+            $http.post("login.ashx", { Email: $scope.$localStorage.Email, Password: $scope.Password })
+                .success(function (Data) {
+                    $scope.$localStorage.Token = Data.Token;
+                    if (angular.isFunction(Success)) Success();
+                    $modalInstance.close();
+                })
+                .error(function (Response) {
+                    $scope.$localStorage.Token = null;
+                    $scope.Message = Response;
+                    if (angular.isFunction(Failure)) Failure();
+                });
+        };
 
-    $scope.Cancel = function () { $modalInstance.dismiss("Cancel"); };
+        $scope.Cancel = function () {
+            if (angular.isFunction(Failure)) Failure();
+            $modalInstance.dismiss("Cancel");
+        };
 
-    $scope.DismissMessage = function () { $scope.Message = null; };
+        $scope.DismissMessage = function () { $scope.Message = null; };
 
-}]);
+    }]);

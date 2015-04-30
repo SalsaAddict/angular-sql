@@ -31,7 +31,8 @@ GO
 
 INSERT INTO [User] ([Forename], [Surname], [Email], [Password], [MustResetPassword])
 VALUES
- (N'Pierre', N'Henry', N'pierre@whitespace.co.uk', N'3YsVMhbpwLiFm7EEHE4pY5Svgyh0hVHaLKYa5dMSGVY=:khgtioJvgkNmAOstoDLRoXRxMEG8EI0Fqiq3xoVVyNA=', 0)
+ (N'Pierre', N'Henry', N'pierre@whitespace.co.uk', N'3YsVMhbpwLiFm7EEHE4pY5Svgyh0hVHaLKYa5dMSGVY=:khgtioJvgkNmAOstoDLRoXRxMEG8EI0Fqiq3xoVVyNA=', 0),
+	(N'Andrew', N'Sedcole', N'andrew@whitespace.co.uk', N'3YsVMhbpwLiFm7EEHE4pY5Svgyh0hVHaLKYa5dMSGVY=:khgtioJvgkNmAOstoDLRoXRxMEG8EI0Fqiq3xoVVyNA=', 0)
 GO
 
 CREATE PROCEDURE [apiUserLogin](@Email NVARCHAR(255))
@@ -54,7 +55,7 @@ BEGIN
 	SELECT
 	 @Error = CASE
 		  WHEN [EnabledUTC] > GETUTCDATE() THEN N'asql:401:Your account is not yet enabled.'
-				WHEN [ExpiredUTC] < GETUTCDATE() THEN N'asql:401:Your account has expired.'
+		  WHEN [ExpiredUTC] < GETUTCDATE() THEN N'asql:401:Your account has expired.'
 				WHEN DATEADD(minute, @Timeout, [PingUTC]) < GETUTCDATE() THEN N'asql:401:Your session has expired.'
 		 END
 	FROM [User]
@@ -103,7 +104,5 @@ GO
 
 SELECT * FROM [User]
 SELECT * FROM ErrorLog
-   at AngularSql.Security.UserIdFromToken(String Token) in \\psf\home\Desktop\GitHub\angular-sql\angular-sql\cs\Security.cs:line 68
-   at AngularSql.Security.VerifyUser(String Token, Boolean IgnoreTimeout) in \\psf\home\Desktop\GitHub\angular-sql\angular-sql\cs\Security.cs:line 79
-   at AngularSql.Login.ProcessRequest(HttpContext Context) in \\psf\home\Desktop\GitHub\angular-sql\angular-sql\login.ashx.cs:line 36
 
+UPDATE [User] SET [PingUTC] = [EnabledUTC]

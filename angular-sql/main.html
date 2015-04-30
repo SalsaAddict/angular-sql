@@ -30,10 +30,9 @@
             <div class="collapse navbar-collapse" collapse="navBarCollapsed">
                 <ul class="nav navbar-nav" ng-show="LoggedIn()">
                     <li><a href="#/home">Home</a></li>
-                    <li><a href="#/entities">Entities</a></li>
+                    <li><a href="#/binders">Binders</a></li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
-                    <li><a href="#/exec">Execute</a></li>
                     <li ng-hide="LoggedIn()"><a href ng-click="Login()">Login</a></li>
                     <li ng-show="LoggedIn()"><a href ng-click="Logout()">Logout</a></li>
                 </ul>
@@ -46,9 +45,11 @@
     <script src="scripts/angular-route.min.js"></script>
     <script src="scripts/angular-ui/ui-bootstrap-tpls.min.js"></script>
     <script src="scripts/ngStorage.min.js"></script>
-    <script src="scripts/angular-sql/app.js"></script>
-    <script src="scripts/angular-sql/LoginController.js"></script>
+    <script src="scripts/angular-sql/Utils.js"></script>
+    <script src="scripts/angular-sql/Application.js"></script>
     <script src="scripts/angular-sql/Procedure.js"></script>
+    <script src="scripts/angular-sql/LoginController.js"></script>
+    <script src="scripts/angular-sql/BindersController.js"></script>
     <script type="text/ng-template" id="LoginForm.html">
         <form name="LoginForm" class="form-horizontal" novalidate>
             <div class="modal-header">
@@ -59,7 +60,7 @@
                 <div class="form-group" ng-class="{'has-error': LoginForm.$dirty && LoginForm.Email.$invalid}">
                     <label class="control-label col-sm-4">Email Address</label>
                     <div class="col-sm-8">
-                        <input type="email" class="form-control" name="Email" ng-model="$ls.Email" required />
+                        <input type="email" class="form-control" name="Email" ng-model="$localStorage.Email" required />
                     </div>
                 </div>
                 <div class="form-group" ng-class="{'has-error': LoginForm.$dirty && LoginForm.Password.$invalid}">

@@ -1,0 +1,27 @@
+﻿<ng-form asql-form>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4>
+                {{Company.Name || "New Company"}}
+                <i class="fa fa-exclamation text-danger" ng-show="HasError()"></i>
+            </h4>
+        </div>
+        <div class="panel-body">
+            <br />
+            <asql-label text="Company Name"><input type="text" ng-model="Company.Name" required asql-control /></asql-label>
+            <asql-label text="Address"><textarea ng-model="Company.Address" rows="5" asql-control></textarea></asql-label>
+            <asql-label text="Postcode"><input type="text" ng-model="Company.Postcode" asql-control /></asql-label>
+            <asql-label text="Country">
+                <select ng-model="Company.CountryId" ng-options="Country.Id as Country.Name for Country in Countries" required asql-control>
+                    <option value=""></option>
+                </select>
+            </asql-label>
+            <div class="form-group" ng-repeat="Role in Roles">
+                <div class="col-sm-9 col-sm-offset-3">
+                    <div class="checkbox"><label><input type="checkbox" ng-model="Company[Role.Id]" /> {{Role.Description}}</label></div>
+                </div>
+            </div>
+        </div>
+        <asql-buttons back="/companies" save="Save()"></asql-buttons>
+    </div>
+</ng-form>

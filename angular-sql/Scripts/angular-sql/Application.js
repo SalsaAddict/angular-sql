@@ -5,6 +5,9 @@ app.config(["$logProvider", "$routeProvider", function ($logProvider, $routeProv
     $routeProvider
         .when("/exec", { caseInsensitiveMatch: true, templateUrl: "views/exec.html", controller: "ExecController" })
         .when("/home", { caseInsensitiveMatch: true, templateUrl: "views/home.html" })
+        .when("/companies", { caseInsensitiveMatch: true, templateUrl: "views/companies.html", controller: "CompaniesController" })
+        .when("/company/:New", { caseInsensitiveMatch: true, templateUrl: "views/company.html", controller: "CompanyController" })
+        .when("/company/:CountryId/:Name", { caseInsensitiveMatch: true, templateUrl: "views/company.html", controller: "CompanyController" })
         .when("/binders", { caseInsensitiveMatch: true, templateUrl: "views/binders.html", controller: "BindersController" })
         .otherwise({ redirectTo: "/home" });
 }]);

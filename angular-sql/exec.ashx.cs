@@ -38,7 +38,7 @@ namespace AngularSql
                                 foreach (Parameter Parameter in Procedure.Parameters)
                                 {
                                     if (Parameter.XML)
-                                        Command.Parameters.AddWithValue(Parameter.Name, JsonConvert.DeserializeXmlNode(JsonConvert.SerializeObject(Parameter.Value)).InnerXml);
+                                        Command.Parameters.AddWithValue(Parameter.Name, JsonConvert.DeserializeXmlNode(JsonConvert.SerializeObject(Parameter.Value), "Object").InnerXml);
                                     else
                                         Command.Parameters.AddWithValue(Parameter.Name, Parameter.Value);
                                 }

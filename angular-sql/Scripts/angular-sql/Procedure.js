@@ -6,6 +6,7 @@
         var Config = { Name: Options.Name, Parameters: [] };
         Config.UserId = asqlBoolean(Options.UserId);
         Config.Type = asqlRestrict(Options.Type, ["singleton", "array", "object"], "execute");
+        Config.Root = (Config.Type === "object") ? asqlIfBlank(Options.Root, null) : null;
         Config.ngModel = (Config.Type === "execute") ? null : Options.ngModel;
         if (angular.isFunction(Options.Success)) Config.Success = Options.Success;
         if (angular.isFunction(Options.Error)) Config.Error = Options.Error;
@@ -31,8 +32,11 @@
                     default: Value = Item.Value; break;
                 };
                 if (asqlIsBlank(Value)) { if (Item.Required === true) HasRequired = false; }
+                if (angular.isObject(Value)) {
+                    Value = { Data: Value };
+                    Parameter.XML = true;
+                };
                 Parameter.Value = asqlIfBlank(Value, null);
-                Parameter.XML = angular.isObject(Value);
                 Data.Parameters.push(Parameter);
             });
             return (HasRequired === true) ? Data : null;
@@ -61,6 +65,7 @@
                             if (!asqlIsBlank(Data)) {
                                 if (angular.isArray(Data)) { switch (Config.Type) { case "array": Result = Data; break; default: Result = Data[0]; break; }; }
                                 else if (angular.isObject(Data)) { switch (Config.Type) { case "array": Result = [Data]; break; default: Result = Data; break; }; }
+                                if (Config.Type === "object" && !asqlIsBlank(Config.Root)) Result = Result[Config.Root];
                             }
                         }
                         if (angular.isFunction(ngModel)) ngModel.assign(Scope, Result);

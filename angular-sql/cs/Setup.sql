@@ -30,9 +30,8 @@ CREATE UNIQUE INDEX [IX_User_Email] ON [User] ([Email]) INCLUDE ([Id], [Password
 GO
 
 INSERT INTO [User] ([Forename], [Surname], [Email], [Password], [MustResetPassword])
-VALUES
- (N'Pierre', N'Henry', N'pierre@whitespace.co.uk', N'3YsVMhbpwLiFm7EEHE4pY5Svgyh0hVHaLKYa5dMSGVY=:khgtioJvgkNmAOstoDLRoXRxMEG8EI0Fqiq3xoVVyNA=', 0),
-	(N'Andrew', N'Sedcole', N'andrew@whitespace.co.uk', N'3YsVMhbpwLiFm7EEHE4pY5Svgyh0hVHaLKYa5dMSGVY=:khgtioJvgkNmAOstoDLRoXRxMEG8EI0Fqiq3xoVVyNA=', 0)
+SELECT N'Pierre', N'Henry', N'pierre@whitespace.co.uk', N'3YsVMhbpwLiFm7EEHE4pY5Svgyh0hVHaLKYa5dMSGVY=:khgtioJvgkNmAOstoDLRoXRxMEG8EI0Fqiq3xoVVyNA=', 0 UNION ALL
+SELECT N'Andrew', N'Sedcole', N'andrew.sedcole@whitespace.co.uk', N'3YsVMhbpwLiFm7EEHE4pY5Svgyh0hVHaLKYa5dMSGVY=:khgtioJvgkNmAOstoDLRoXRxMEG8EI0Fqiq3xoVVyNA=', 0
 GO
 
 CREATE PROCEDURE [apiUserLogin](@Email NVARCHAR(255))
@@ -101,8 +100,3 @@ BEGIN
 	RETURN
 END
 GO
-
-SELECT * FROM [User]
-SELECT * FROM ErrorLog
-
-UPDATE [User] SET [PingUTC] = [EnabledUTC]

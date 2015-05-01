@@ -22,20 +22,21 @@ app.controller("CompanyController", ["$scope", "$routeParams", "Procedure", func
     var apiCountries = new Procedure({ Name: "apiCountries", Type: "array", ngModel: "Countries" });
     apiCountries.Execute($scope);
 
-    $scope.Save = function () {
-        var apiSave = new Procedure({
+    $scope.Save = new Procedure({
             Name: "apiCompanySave", UserId: true, Type: "singleton",
             Parameters: [
                 { Name: "Name", Type: "scope", Value: "Company.Name", Required: true },
                 { Name: "Address", Type: "scope", Value: "Company.Address" },
                 { Name: "Postcode", Type: "scope", Value: "Company.Postcode" },
                 { Name: "CountryId", Type: "scope", Value: "Company.CountryId", Required: true }
-            ],
-            Success: function (Data) { $scope.Company = Data; }
+            ]
         });
-        angular.forEach($scope.Roles, function (Item) { apiSave.AddParameter({ Name: Item.Id, Type: "scope", Value: "Company." + Item.Id }) });
-        if (!$routeParams.New) apiSave.AddParameter({ Name: "CompanyId", Type: "scope", Value: "Company.CompanyId" });
-        apiSave.Execute($scope);
-    };
+    angular.forEach($scope.Roles, function (Item) { $scope.Save.AddParameter({ Name: Item.Id, Type: "scope", Value: "Company." + Item.Id }) });
+    if (!$routeParams.New) $scope.Save.AddParameter({ Name: "CompanyId", Type: "scope", Value: "Company.CompanyId" });
+
+    $scope.Delete = new Procedure({
+        Name: "apiCompanyDelete", UserId: true,
+        Parameters: [{ Name: "CompanyId", Type: "scope", Value: "Company.CompanyId", Required: true }]
+    });
 
 }]);

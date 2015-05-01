@@ -1,50 +1,58 @@
-﻿app.directive("asqlForm", function () {
+﻿app.directive("asqlForm", ["$interpolate", "$parse", "$window", "$location", "$route", function ($interpolate, $parse, $window, $location, $route) {
     return {
-        restrict: "A",
-        require: ["form", "^^?form"],
-        scope: true,
+        restrict: "E",
+        templateUrl: "controls/asqlForm.html",
+        transclude: true,
+        scope: false,
+        controller: function ($scope) {
+            $scope.asqlForm = {};
+            this.formDirty = function () { return $scope.asqlFormX.$dirty; };
+        },
         link: function (scope, iElement, iAttrs, controller) {
-            if (!iElement.hasClass("form-horizontal")) iElement.addClass("form-horizontal");
-            iElement.attr("novalidate", true);
-            scope.HasError = function () { return asqlIfBlank(controller[1], controller[0]).$dirty && controller[0].$invalid; };
+            scope.asqlForm.alert = null;
+            scope.asqlForm.dismissAlert = function () { scope.asqlForm.alert = null };
+            scope.asqlForm.heading = function () { return $interpolate(iAttrs["heading"])(scope); };
+            scope.asqlForm.canEdit = function () { return angular.isDefined(scope.Save); };
+            scope.asqlForm.editing = function () { return scope.asqlForm.canEdit() && scope.asqlFormX.$dirty; };
+            scope.asqlForm.hasError = function () { return scope.asqlForm.editing() && scope.asqlFormX.$invalid; };
+            scope.asqlForm.back = function () { if (iAttrs["back"]) $location.path(iAttrs["back"]); else $window.history.back(); };
+            scope.asqlForm.undo = function () { $route.reload(); };
+            scope.asqlForm.save = function () {
+                scope.Save.Execute(scope)
+                    .success(function (data) { scope.asqlForm.alert = { type: "success", message: "Saved successfully." }; scope.asqlFormX.$setPristine(); })
+                    .error(function (response, status) { scope.asqlForm.alert = { type: "danger", message: response }; });
+            }
         }
     };
-});
+}]);
 
-app.directive("asqlLabel", function () {
+app.directive("asqlSubForm", [function () {
+    return {
+        restrict: "A",
+        require: ["form", "^^asqlForm"],
+        scope: true,
+        link: function (scope, iElement, iAttrs, controller) {
+            iElement.attr("novalidate", true);
+            scope.formDirty = function () { return controller[1].formDirty(); };
+            scope.hasError = function () { return scope.formDirty() && controller[0].$invalid; };
+        }
+    };
+}]);
+
+app.directive("asqlLabel", [function () {
     return {
         restrict: "E",
         templateUrl: "controls/asqlLabel.html",
-        scope: { Text: "@text" },
-        transclude: true
+        transclude: true,
+        scope: { text: "@" }
     };
-});
+}]);
 
-app.directive("asqlControl", function () {
+app.directive("asqlControl", [function () {
     return {
         restrict: "A",
         link: function (scope, iElement, iAttrs, controller) {
             if (!iElement.hasClass("form-control")) iElement.addClass("form-control");
-        }
-    };
-});
-
-app.directive("asqlButtons", ["$window", "$location", "$route", function ($window, $location, $route) {
-    return {
-        restrict: "E",
-        require: "^^form",
-        templateUrl: "controls/asqlButtons.html",
-        scope: { back: "@", Save: "&save", Undo: "&undo", Delete: "&delete" },
-        controller: function ($scope) {
-            $scope.Back = function () { if ($scope.back) { $location.path($scope.back); } else { $window.history.back(); } };
-        },
-        link: function (scope, iElement, iAttrs, controller) {
-            scope.Dirty = function () { return controller.$dirty; };
-            scope.CanEdit = function () { return angular.isDefined(iAttrs["save"]); };
-            scope.ShowDelete = function () { return angular.isDefined(iAttrs["delete"]); };
-            scope.Editing = function () { return scope.CanEdit() && scope.Dirty(); };
-            scope.DisableSave = function () { return controller.$invalid; };
-            if (!angular.isDefined(iAttrs["undo"])) scope.Undo = function () { $route.reload(); };
         }
     };
 }]);

@@ -65,6 +65,7 @@
   <ItemGroup>
     <Content Include="controls\asqlButtons.html" />
     <Content Include="controls\asqlField.html" />
+    <Content Include="controls\asqlForm.html" />
     <Content Include="controls\asqlLabel.html" />
     <Content Include="scripts\angular-sql\BindersController.js" />
     <Content Include="scripts\angular-sql\Company.js" />

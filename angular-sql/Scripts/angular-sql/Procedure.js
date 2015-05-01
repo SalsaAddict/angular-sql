@@ -58,7 +58,7 @@
             };
             var PostData = self.PostData(Scope);
             if (!asqlIsBlank(PostData)) {
-                $http.post("exec.ashx", PostData)
+                return $http.post("exec.ashx", PostData)
                     .success(function (Data) {
                         var Result = self.Empty();
                         if (Config.Type !== "execute") {

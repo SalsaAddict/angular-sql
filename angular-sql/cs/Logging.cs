@@ -28,6 +28,11 @@ namespace AngularSql
                 catch { StatusCode = 500; }
                 Message = Split[2];
             }
+            else if (Exception.Message.Contains("Cannot insert duplicate key"))
+            {
+                StatusCode = 400;
+                Message = "A similar record already exists.";
+            }
             else { StatusCode = 500; Message = UnexpectedError; }
 
             string IPAddress = Context.Request.UserHostAddress;

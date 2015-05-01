@@ -63,6 +63,8 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="content\bootstrap.paper.css" />
+    <Content Include="content\bootstrap.paper.min.css" />
     <Content Include="controls\asqlButtons.html" />
     <Content Include="controls\asqlField.html" />
     <Content Include="controls\asqlForm.html" />

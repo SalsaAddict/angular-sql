@@ -5,22 +5,29 @@
         transclude: true,
         scope: false,
         controller: function ($scope) {
-            $scope.asqlForm = {};
+            $scope.asqlForm = { alert: null };
+            this.canEdit = $scope.asqlForm.canEdit = function () { return angular.isDefined($scope.Save); };
             this.formDirty = function () { return $scope.asqlFormX.$dirty; };
+            $scope.$on("$routeChangeStart", function (event) {
+                if ($scope.asqlFormX.$dirty) {
+                    $scope.asqlForm.alert = { type: "danger", message: "Please save or undo your changes first." };
+                    event.preventDefault();
+                };
+            });
         },
-        link: function (scope, iElement, iAttrs, controller) {
-            scope.asqlForm.alert = null;
-            scope.asqlForm.dismissAlert = function () { scope.asqlForm.alert = null };
-            scope.asqlForm.heading = function () { return $interpolate(iAttrs["heading"])(scope); };
-            scope.asqlForm.canEdit = function () { return angular.isDefined(scope.Save); };
-            scope.asqlForm.editing = function () { return scope.asqlForm.canEdit() && scope.asqlFormX.$dirty; };
-            scope.asqlForm.hasError = function () { return scope.asqlForm.editing() && scope.asqlFormX.$invalid; };
-            scope.asqlForm.back = function () { if (iAttrs["back"]) $location.path(iAttrs["back"]); else $window.history.back(); };
-            scope.asqlForm.undo = function () { $route.reload(); };
-            scope.asqlForm.save = function () {
-                scope.Save.Execute(scope)
-                    .success(function (data) { scope.asqlForm.alert = { type: "success", message: "Saved successfully." }; scope.asqlFormX.$setPristine(); })
-                    .error(function (response, status) { scope.asqlForm.alert = { type: "danger", message: response }; });
+        link: {
+            pre: function (scope, iElement, iAttrs, controller) {
+                scope.asqlForm.dismissAlert = function () { scope.asqlForm.alert = null };
+                scope.asqlForm.heading = function () { return $interpolate(iAttrs["heading"])(scope); };
+                scope.asqlForm.editing = function () { return scope.asqlForm.canEdit() && scope.asqlFormX.$dirty; };
+                scope.asqlForm.hasError = function () { return scope.asqlForm.editing() && scope.asqlFormX.$invalid; };
+                scope.asqlForm.back = function () { if (iAttrs["back"]) $location.path(iAttrs["back"]); else $window.history.back(); };
+                scope.asqlForm.undo = function () { $route.reload(); };
+                scope.asqlForm.save = function () {
+                    scope.Save.Execute(scope)
+                        .success(function (data) { scope.asqlForm.alert = { type: "success", message: "Saved successfully." }; scope.asqlFormX.$setPristine(); })
+                        .error(function (response, status) { scope.asqlForm.alert = { type: "danger", message: response }; });
+                };
             }
         }
     };
@@ -48,11 +55,18 @@ app.directive("asqlLabel", [function () {
     };
 }]);
 
-app.directive("asqlControl", [function () {
+app.directive("asqlControl", ["$filter", function ($filter) {
     return {
         restrict: "A",
+        require: ["^^asqlForm", "ngModel"],
         link: function (scope, iElement, iAttrs, controller) {
-            if (!iElement.hasClass("form-control")) iElement.addClass("form-control");
+            if (!iElement.hasClass("form-control") && iElement.prop("type") !== "checkbox") iElement.addClass("form-control");
+            if (iElement.prop("type") === "date") {
+                controller[1].$formatters.push(function (modelValue) { return new Date(modelValue); });
+                controller[1].$parsers.push(function (modelValue) { return $filter("date")(new Date(modelValue), "yyyy-MM-dd"); });
+            };
+            if (!controller[0].canEdit()) iElement.attr("disabled", true);
+
         }
     };
 }]);

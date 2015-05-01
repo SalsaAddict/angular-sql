@@ -11,9 +11,9 @@
     </div>
     <div class="list-group">
         <a ng-href="#/company/new" class="list-group-item">
-            <h4 class="text-primary">
+            <span class="text-primary">
                 <i class="fa fa-plus-circle"></i> New Company
-            </h4>
+            </span>
         </a>
         <a ng-repeat="Company in Companies | filter : Search" ng-href="#/company/{{Company.CountryId}}/{{Company.Name}}" class="list-group-item">
             <h4 class="list-group-item-heading">{{Company.Name}}</h4>

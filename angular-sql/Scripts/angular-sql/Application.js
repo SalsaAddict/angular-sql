@@ -9,10 +9,14 @@ app.config(["$logProvider", "$routeProvider", function ($logProvider, $routeProv
         .when("/company/:New", { caseInsensitiveMatch: true, templateUrl: "views/company.html", controller: "CompanyController" })
         .when("/company/:CountryId/:Name", { caseInsensitiveMatch: true, templateUrl: "views/company.html", controller: "CompanyController" })
         .when("/binders", { caseInsensitiveMatch: true, templateUrl: "views/binders.html", controller: "BindersController" })
+        .when("/binder", { caseInsensitiveMatch: true, templateUrl: "views/binder.html", controller: "BinderController" })
+        .when("/binder/:BinderId", { caseInsensitiveMatch: true, templateUrl: "views/binder.html", controller: "BinderController" })
         .otherwise({ redirectTo: "/home" });
 }]);
 
 app.run(["$rootScope", "$localStorage", "$modal", function ($rootScope, $localStorage, $modal) {
+
+    $rootScope.navBarCollapsed = true;
 
     $rootScope.$localStorage = $localStorage;
 

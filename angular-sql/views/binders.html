@@ -1,2 +1,23 @@
-﻿<input type="email" class="form-control" placeholder="Email Address" ng-model="$localStorage.Email" />
-<pre>{{UserLogin}}</pre>
+﻿<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="row">
+            <div class="col-sm-9">
+                <h4>Binders</h4>
+            </div>
+            <div class="col-sm-3">
+                <input type="text" class="form-control" placeholder="Search&hellip;" ng-model="Search" />
+            </div>
+        </div>
+    </div>
+    <div class="list-group">
+        <a ng-href="#/binder" class="list-group-item">
+            <span class="text-primary">
+                <i class="fa fa-plus-circle"></i> New Binder
+            </span>
+        </a>
+        <a ng-repeat="Binder in Binders | filter : Search" ng-href="#/binder/{{Binder.BinderId}}" class="list-group-item">
+            <h4 class="list-group-item-heading">{{Binder.Coverholder}} <small>{{Binder.UMR}}</small></h4>
+            <p class="list-group-item-text">{{Binder.InceptionDate | date : "shortDate"}} - {{Binder.ExpiryDate | date : "shortDate"}}</p>
+        </a>
+    </div>
+</div>

@@ -65,11 +65,10 @@
   <ItemGroup>
     <Content Include="content\bootstrap.paper.css" />
     <Content Include="content\bootstrap.paper.min.css" />
-    <Content Include="controls\asqlButtons.html" />
-    <Content Include="controls\asqlField.html" />
     <Content Include="controls\asqlForm.html" />
     <Content Include="controls\asqlLabel.html" />
-    <Content Include="scripts\angular-sql\BindersController.js" />
+    <Content Include="scripts\angular-locale_en-gb.js" />
+    <Content Include="scripts\angular-sql\Binder.js" />
     <Content Include="scripts\angular-sql\Company.js" />
     <Content Include="scripts\angular-sql\Controls.js" />
     <Content Include="scripts\angular-sql\LoginController.js" />
@@ -128,6 +127,7 @@
     <Content Include="scripts\jquery-1.9.1.js" />
     <Content Include="scripts\jquery-1.9.1.min.js" />
     <Content Include="scripts\npm.js" />
+    <Content Include="views\binder.html" />
     <Content Include="views\binders.html" />
     <Content Include="views\companies.html" />
     <Content Include="views\company.html" />

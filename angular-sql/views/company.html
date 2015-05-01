@@ -1,4 +1,4 @@
-﻿<asql-form heading="{{Company.Name || 'New Company'}}">
+﻿<asql-form heading="{{Company.Name || 'New Company'}}" back="/companies">
     <br />
     <asql-label text="Company Name"><input type="text" ng-model="Company.Name" required asql-control /></asql-label>
     <asql-label text="Address"><textarea ng-model="Company.Address" rows="5" asql-control></textarea></asql-label>
@@ -10,7 +10,8 @@
     </asql-label>
     <div class="form-group" ng-repeat="Role in Roles">
         <div class="col-sm-9 col-sm-offset-3">
-            <div class="checkbox"><label><input type="checkbox" ng-model="Company[Role.Id]" /> {{Role.Description}}</label></div>
+            <div class="checkbox"><label><input type="checkbox" ng-model="Company[Role.Id]" asql-control /> {{Role.Description}}</label></div>
         </div>
     </div>
 </asql-form>
+

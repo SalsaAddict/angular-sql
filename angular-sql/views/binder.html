@@ -1,0 +1,39 @@
+﻿<asql-form heading="{{Binder.UMR || 'New Binder'}}" back="/binders">
+    <tabset>
+        <tab heading="Binder Details">
+            <br />
+            <asql-label text="Agreement Number"><input type="text" ng-model="Binder.Reference" asql-control /></asql-label>
+            <asql-label text="Unique Market Reference"><input type="text" ng-model="Binder.UMR" required asql-control /></asql-label>
+            <asql-label text="Coverholder">
+                <select ng-model="Binder.CoverholderId" ng-options="Coverholder.Id as Coverholder.Name for Coverholder in Coverholders" required asql-control>
+                    <option value=""></option>
+                </select>
+            </asql-label>
+            <asql-label text="Broker">
+                <select ng-model="Binder.BrokerId" ng-options="Broker.Id as Broker.Name for Broker in Brokers" required asql-control>
+                    <option value=""></option>
+                </select>
+            </asql-label>
+            <asql-label text="Inception Date"><input type="date" ng-model="Binder.InceptionDate" required asql-control /></asql-label>
+            <asql-label text="Expiry Date"><input type="date" ng-model="Binder.ExpiryDate" required asql-control /></asql-label>
+        </tab>
+        <tab heading="Territories">
+            <br />
+            <asql-label text="Risks Located in">
+                <select ng-model="Binder.RisksTerritoryId" ng-options="Territory.Id as Territory.Name for Territory in Territories" required asql-control>
+                    <option value=""></option>
+                </select>
+            </asql-label>
+            <asql-label text="Insureds Domiciled in">
+                <select ng-model="Binder.DomiciledTerritoryId" ng-options="Territory.Id as Territory.Name for Territory in Territories" required asql-control>
+                    <option value=""></option>
+                </select>
+            </asql-label>
+            <asql-label text="Territorial Limits">
+                <select ng-model="Binder.LimitsTerritoryId" ng-options="Territory.Id as Territory.Name for Territory in Territories" required asql-control>
+                    <option value=""></option>
+                </select>
+            </asql-label>
+        </tab>
+    </tabset>
+</asql-form>

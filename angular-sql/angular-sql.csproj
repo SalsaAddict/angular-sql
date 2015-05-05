@@ -67,6 +67,8 @@
     <Content Include="content\bootstrap.paper.min.css" />
     <Content Include="controls\asqlForm.html" />
     <Content Include="controls\asqlLabel.html" />
+    <Content Include="cs\Binder.sql" />
+    <Content Include="cs\Setup.sql" />
     <Content Include="scripts\angular-locale_en-gb.js" />
     <Content Include="scripts\angular-sql\Binder.js" />
     <Content Include="scripts\angular-sql\Company.js" />

@@ -14,15 +14,17 @@ app.config(["$logProvider", "$routeProvider", function ($logProvider, $routeProv
         .otherwise({ redirectTo: "/home" });
 }]);
 
-app.run(["$rootScope", "$localStorage", "$modal", function ($rootScope, $localStorage, $modal) {
+app.run(["$rootScope", "$route", "$localStorage", "$modal", function ($rootScope, $route, $localStorage, $modal) {
 
     $rootScope.navBarCollapsed = true;
+    $rootScope.$on("$routeChangeSuccess", function (event) { $rootScope.navBarCollapsed = true; });
 
     $rootScope.$localStorage = $localStorage;
 
     $rootScope.LoggedIn = function () { return ($localStorage.Token) ? true : false; };
 
     $rootScope.Login = function (Message, Success, Failure) {
+        $rootScope.navBarCollapsed = true;
         var LoginModal = $modal.open({
             templateUrl: "LoginForm.html",
             controller: "LoginController",
@@ -35,6 +37,9 @@ app.run(["$rootScope", "$localStorage", "$modal", function ($rootScope, $localSt
         });
     };
 
-    $rootScope.Logout = function () { $localStorage.Token = null; }
+    $rootScope.Logout = function () {
+        $rootScope.navBarCollapsed = true;
+        $localStorage.Token = null;
+    }
 
 }]);

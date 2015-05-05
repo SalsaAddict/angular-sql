@@ -3,6 +3,7 @@ GO
 
 IF OBJECT_ID(N'apiBinderBroker', N'P') IS NOT NULL DROP PROCEDURE [apiBinderBroker]
 IF OBJECT_ID(N'apiBinderCoverholder', N'P') IS NOT NULL DROP PROCEDURE [apiBinderCoverholder]
+IF OBJECT_ID(N'apiBinderInsert', N'P') IS NOT NULL DROP PROCEDURE [apiBinderInsert]
 IF OBJECT_ID(N'apiBinder', N'P') IS NOT NULL DROP PROCEDURE [apiBinder]
 IF OBJECT_ID(N'apiBinders', N'P') IS NOT NULL DROP PROCEDURE [apiBinders]
 IF OBJECT_ID(N'Binder', N'U') IS NOT NULL DROP TABLE [Binder]
@@ -12,6 +13,7 @@ IF OBJECT_ID(N'apiCompany', N'P') IS NOT NULL DROP PROCEDURE [apiCompany]
 IF OBJECT_ID(N'apiCompanies', N'P') IS NOT NULL DROP PROCEDURE [apiCompanies]
 IF OBJECT_ID(N'CompanyRole', N'U') IS NOT NULL DROP TABLE [CompanyRole]
 IF OBJECT_ID(N'Company', N'U') IS NOT NULL DROP TABLE [Company]
+IF OBJECT_ID(N'vwTerritoryCountries', N'V') IS NOT NULL DROP VIEW [vwTerritoryCountries]
 IF OBJECT_ID(N'TerritoryCountry', N'U') IS NOT NULL DROP TABLE [TerritoryCountry]
 IF OBJECT_ID(N'apiTerritories', N'P') IS NOT NULL DROP PROCEDURE [apiTerritories]
 IF OBJECT_ID(N'Territory', N'U') IS NOT NULL DROP TABLE [Territory]
@@ -27,10 +29,257 @@ CREATE TABLE [Country] (
 	)
 GO
 
-INSERT INTO [Country] ([Id], [Name])
+INSERT INTO [Country] ([Name], [Id])
 VALUES
- (N'UK', N'United Kingdom'),
-	(N'US', N'United States')
+ (N'Afghanistan', N'AF'),
+ (N'�land Islands', N'AX'),
+ (N'Albania', N'AL'),
+ (N'Algeria', N'DZ'),
+ (N'American Samoa', N'AS'),
+ (N'Andorra', N'AD'),
+ (N'Angola', N'AO'),
+ (N'Anguilla', N'AI'),
+ (N'Antarctica', N'AQ'),
+ (N'Antigua and Barbuda', N'AG'),
+ (N'Argentina', N'AR'),
+ (N'Armenia', N'AM'),
+ (N'Aruba', N'AW'),
+ (N'Australia', N'AU'),
+ (N'Austria', N'AT'),
+ (N'Azerbaijan', N'AZ'),
+ (N'Bahamas', N'BS'),
+ (N'Bahrain', N'BH'),
+ (N'Bangladesh', N'BD'),
+ (N'Barbados', N'BB'),
+ (N'Belarus', N'BY'),
+ (N'Belgium', N'BE'),
+ (N'Belize', N'BZ'),
+ (N'Benin', N'BJ'),
+ (N'Bermuda', N'BM'),
+ (N'Bhutan', N'BT'),
+ (N'Bolivia, Plurinational State of', N'BO'),
+ (N'Bonaire, Sint Eustatius and Saba', N'BQ'),
+ (N'Bosnia and Herzegovina', N'BA'),
+ (N'Botswana', N'BW'),
+ (N'Bouvet Island', N'BV'),
+ (N'Brazil', N'BR'),
+ (N'British Indian Ocean Territory', N'IO'),
+ (N'Brunei Darussalam', N'BN'),
+ (N'Bulgaria', N'BG'),
+ (N'Burkina Faso', N'BF'),
+ (N'Burundi', N'BI'),
+ (N'Cambodia', N'KH'),
+ (N'Cameroon', N'CM'),
+ (N'Canada', N'CA'),
+ (N'Cape Verde', N'CV'),
+ (N'Cayman Islands', N'KY'),
+ (N'Central African Republic', N'CF'),
+ (N'Chad', N'TD'),
+ (N'Chile', N'CL'),
+ (N'China', N'CN'),
+ (N'Christmas Island', N'CX'),
+ (N'Cocos (Keeling) Islands', N'CC'),
+ (N'Colombia', N'CO'),
+ (N'Comoros', N'KM'),
+ (N'Congo', N'CG'),
+ (N'Congo, the Democratic Republic of the', N'CD'),
+ (N'Cook Islands', N'CK'),
+ (N'Costa Rica', N'CR'),
+ (N'Côte d''Ivoire', N'CI'),
+ (N'Croatia', N'HR'),
+ (N'Cuba', N'CU'),
+ (N'Curaçao', N'CW'),
+ (N'Cyprus', N'CY'),
+ (N'Czech Republic', N'CZ'),
+ (N'Denmark', N'DK'),
+ (N'Djibouti', N'DJ'),
+ (N'Dominica', N'DM'),
+ (N'Dominican Republic', N'DO'),
+ (N'Ecuador', N'EC'),
+ (N'Egypt', N'EG'),
+ (N'El Salvador', N'SV'),
+ (N'Equatorial Guinea', N'GQ'),
+ (N'Eritrea', N'ER'),
+ (N'Estonia', N'EE'),
+ (N'Ethiopia', N'ET'),
+ (N'Falkland Islands (Malvinas)', N'FK'),
+ (N'Faroe Islands', N'FO'),
+ (N'Fiji', N'FJ'),
+ (N'Finland', N'FI'),
+ (N'France', N'FR'),
+ (N'French Guiana', N'GF'),
+ (N'French Polynesia', N'PF'),
+ (N'French Southern Territories', N'TF'),
+ (N'Gabon', N'GA'),
+ (N'Gambia', N'GM'),
+ (N'Georgia', N'GE'),
+ (N'Germany', N'DE'),
+ (N'Ghana', N'GH'),
+ (N'Gibraltar', N'GI'),
+ (N'Greece', N'GR'),
+ (N'Greenland', N'GL'),
+ (N'Grenada', N'GD'),
+ (N'Guadeloupe', N'GP'),
+ (N'Guam', N'GU'),
+ (N'Guatemala', N'GT'),
+ (N'Guernsey', N'GG'),
+ (N'Guinea', N'GN'),
+ (N'Guinea-Bissau', N'GW'),
+ (N'Guyana', N'GY'),
+ (N'Haiti', N'HT'),
+ (N'Heard Island and McDonald Mcdonald Islands', N'HM'),
+ (N'Holy See (Vatican City State)', N'VA'),
+ (N'Honduras', N'HN'),
+ (N'Hong Kong', N'HK'),
+ (N'Hungary', N'HU'),
+ (N'Iceland', N'IS'),
+ (N'India', N'IN'),
+ (N'Indonesia', N'ID'),
+ (N'Iran, Islamic Republic of', N'IR'),
+ (N'Iraq', N'IQ'),
+ (N'Ireland', N'IE'),
+ (N'Isle of Man', N'IM'),
+ (N'Israel', N'IL'),
+ (N'Italy', N'IT'),
+ (N'Jamaica', N'JM'),
+ (N'Japan', N'JP'),
+ (N'Jersey', N'JE'),
+ (N'Jordan', N'JO'),
+ (N'Kazakhstan', N'KZ'),
+ (N'Kenya', N'KE'),
+ (N'Kiribati', N'KI'),
+ (N'Korea, Democratic People''s Republic of', N'KP'),
+ (N'Korea, Republic of', N'KR'),
+ (N'Kuwait', N'KW'),
+ (N'Kyrgyzstan', N'KG'),
+ (N'Lao People''s Democratic Republic', N'LA'),
+ (N'Latvia', N'LV'),
+ (N'Lebanon', N'LB'),
+ (N'Lesotho', N'LS'),
+ (N'Liberia', N'LR'),
+ (N'Libya', N'LY'),
+ (N'Liechtenstein', N'LI'),
+ (N'Lithuania', N'LT'),
+ (N'Luxembourg', N'LU'),
+ (N'Macao', N'MO'),
+ (N'Macedonia, the Former Yugoslav Republic of', N'MK'),
+ (N'Madagascar', N'MG'),
+ (N'Malawi', N'MW'),
+ (N'Malaysia', N'MY'),
+ (N'Maldives', N'MV'),
+ (N'Mali', N'ML'),
+ (N'Malta', N'MT'),
+ (N'Marshall Islands', N'MH'),
+ (N'Martinique', N'MQ'),
+ (N'Mauritania', N'MR'),
+ (N'Mauritius', N'MU'),
+ (N'Mayotte', N'YT'),
+ (N'Mexico', N'MX'),
+ (N'Micronesia, Federated States of', N'FM'),
+ (N'Moldova, Republic of', N'MD'),
+ (N'Monaco', N'MC'),
+ (N'Mongolia', N'MN'),
+ (N'Montenegro', N'ME'),
+ (N'Montserrat', N'MS'),
+ (N'Morocco', N'MA'),
+ (N'Mozambique', N'MZ'),
+ (N'Myanmar', N'MM'),
+ (N'Namibia', N'NA'),
+ (N'Nauru', N'NR'),
+ (N'Nepal', N'NP'),
+ (N'Netherlands', N'NL'),
+ (N'New Caledonia', N'NC'),
+ (N'New Zealand', N'NZ'),
+ (N'Nicaragua', N'NI'),
+ (N'Niger', N'NE'),
+ (N'Nigeria', N'NG'),
+ (N'Niue', N'NU'),
+ (N'Norfolk Island', N'NF'),
+ (N'Northern Mariana Islands', N'MP'),
+ (N'Norway', N'NO'),
+ (N'Oman', N'OM'),
+ (N'Pakistan', N'PK'),
+ (N'Palau', N'PW'),
+ (N'Palestine, State of', N'PS'),
+ (N'Panama', N'PA'),
+ (N'Papua New Guinea', N'PG'),
+ (N'Paraguay', N'PY'),
+ (N'Peru', N'PE'),
+ (N'Philippines', N'PH'),
+ (N'Pitcairn', N'PN'),
+ (N'Poland', N'PL'),
+ (N'Portugal', N'PT'),
+ (N'Puerto Rico', N'PR'),
+ (N'Qatar', N'QA'),
+ (N'Réunion', N'RE'),
+ (N'Romania', N'RO'),
+ (N'Russian Federation', N'RU'),
+ (N'Rwanda', N'RW'),
+ (N'Saint Barthélemy', N'BL'),
+ (N'Saint Helena, Ascension and Tristan da Cunha', N'SH'),
+ (N'Saint Kitts and Nevis', N'KN'),
+ (N'Saint Lucia', N'LC'),
+ (N'Saint Martin (French part)', N'MF'),
+ (N'Saint Pierre and Miquelon', N'PM'),
+ (N'Saint Vincent and the Grenadines', N'VC'),
+ (N'Samoa', N'WS'),
+ (N'San Marino', N'SM'),
+ (N'Sao Tome and Principe', N'ST'),
+ (N'Saudi Arabia', N'SA'),
+ (N'Senegal', N'SN'),
+ (N'Serbia', N'RS'),
+ (N'Seychelles', N'SC'),
+ (N'Sierra Leone', N'SL'),
+ (N'Singapore', N'SG'),
+ (N'Sint Maarten (Dutch part)', N'SX'),
+ (N'Slovakia', N'SK'),
+ (N'Slovenia', N'SI'),
+ (N'Solomon Islands', N'SB'),
+ (N'Somalia', N'SO'),
+ (N'South Africa', N'ZA'),
+ (N'South Georgia and the South Sandwich Islands', N'GS'),
+ (N'South Sudan', N'SS'),
+ (N'Spain', N'ES'),
+ (N'Sri Lanka', N'LK'),
+ (N'Sudan', N'SD'),
+ (N'Suriname', N'SR'),
+ (N'Svalbard and Jan Mayen', N'SJ'),
+ (N'Swaziland', N'SZ'),
+ (N'Sweden', N'SE'),
+ (N'Switzerland', N'CH'),
+ (N'Syrian Arab Republic', N'SY'),
+ (N'Taiwan, Province of China', N'TW'),
+ (N'Tajikistan', N'TJ'),
+ (N'Tanzania, United Republic of', N'TZ'),
+ (N'Thailand', N'TH'),
+ (N'Timor-Leste', N'TL'),
+ (N'Togo', N'TG'),
+ (N'Tokelau', N'TK'),
+ (N'Tonga', N'TO'),
+ (N'Trinidad and Tobago', N'TT'),
+ (N'Tunisia', N'TN'),
+ (N'Turkey', N'TR'),
+ (N'Turkmenistan', N'TM'),
+ (N'Turks and Caicos Islands', N'TC'),
+ (N'Tuvalu', N'TV'),
+ (N'Uganda', N'UG'),
+ (N'Ukraine', N'UA'),
+ (N'United Arab Emirates', N'AE'),
+ (N'United Kingdom', N'GB'),
+ (N'United States', N'US'),
+ (N'United States Minor Outlying Islands', N'UM'),
+ (N'Uruguay', N'UY'),
+ (N'Uzbekistan', N'UZ'),
+ (N'Vanuatu', N'VU'),
+ (N'Venezuela, Bolivarian Republic of', N'VE'),
+ (N'Viet Nam', N'VN'),
+ (N'Virgin Islands, British', N'VG'),
+ (N'Virgin Islands, U.S.', N'VI'),
+ (N'Wallis and Futuna', N'WF'),
+ (N'Western Sahara', N'EH'),
+ (N'Yemen', N'YE'),
+ (N'Zambia', N'ZM'),
+ (N'Zimbabwe', N'ZW')
 GO
 
 CREATE PROCEDURE [apiCountries]
@@ -86,10 +335,26 @@ GO
 
 INSERT INTO [TerritoryCountry] ([TerritoryId], [Type], [CountryId])
 VALUES
- (1, 1, N'UK'),
+ (1, 1, N'GB'),
 	(2, 1, N'US'),
-	(3, 0, N'UK'),
+	(3, 0, N'GB'),
 	(3, 0, N'US')
+GO
+
+CREATE VIEW [vwTerritoryCountries]
+AS
+SELECT
+ [TerritoryId] = t.[Id],
+	[Territory] = t.[Name],
+	[CountryId] = c.[Id],
+	[Country] = c.[Name]
+FROM [Territory] t CROSS JOIN [Country] c
+ LEFT JOIN [TerritoryCountry] tc ON t.[Id] = tc.[TerritoryId] AND c.[Id] = tc.[CountryId]
+WHERE (
+   t.[Type] IS NULL
+			OR (t.[Type] = 1 AND tc.[CountryId] IS NOT NULL)
+			OR (t.[Type] = 0 AND tc.[CountryId] IS NULL)
+  )
 GO
 
 CREATE TABLE [Company] (
@@ -115,10 +380,10 @@ CREATE TABLE [Company] (
 	)
 GO
 
-INSERT INTO [Company] ([Name], [CountryId], [CreatedById], [UpdatedById])
+INSERT INTO [Company] ([Name], [CountryId], [LBR], [COV], [CreatedById], [UpdatedById])
 VALUES
- (N'Whitespace Software Limited', N'UK', 1, 1),
-	(N'Datarise Limited', N'US', 2, 2)
+ (N'Whitespace Software Limited', N'GB', 1, 0, 1, 1),
+	(N'Datarise Limited', N'US', 0, 1, 2, 2)
 GO
 
 CREATE TABLE [CompanyRole] (
@@ -193,7 +458,7 @@ CREATE PROCEDURE [apiCompanySave](
 		@Name NVARCHAR(255),
 		@Address NVARCHAR(255) = NULL,
 		@Postcode NVARCHAR(25) = NULL,
-		@CountryId NCHAR(2) = N'UK',
+		@CountryId NCHAR(2) = N'GB',
 		@LBR BIT = 0,
 		@COV BIT = 0,
 		@CAR BIT = 0,
@@ -333,6 +598,55 @@ BEGIN
 	FROM [Binder]
 	WHERE [Id] = @BinderId
 	RETURN
+END
+GO
+
+CREATE PROCEDURE [apiBinderInsert](
+  @UMR NVARCHAR(50),
+		@Reference NVARCHAR(50) = NULL,
+		@BrokerId INT,
+		@CoverholderId INT,
+		@InceptionDate DATE,
+		@ExpiryDate DATE,
+		@RisksTerritoryId INT,
+		@DomiciledTerritoryId INT,
+		@LimitsTerritoryId INT,
+  @UserId INT
+	)
+AS
+BEGIN
+ DECLARE @BinderId INT
+	INSERT INTO [Binder] (
+	  [UMR],
+			[Reference],
+			[BrokerId],
+			[CoverholderId],
+			[InceptionDate],
+			[ExpiryDate],
+			[RisksTerritoryId],
+			[DomiciledTerritoryId],
+			[LimitsTerritoryId],
+			[CreatedDTO],
+			[CreatedById],
+			[UpdatedDTO],
+			[UpdatedById]
+	 )
+	SELECT
+	 [UMR] = @UMR,
+  [Reference] = @Reference,
+		[BrokerId] = @BrokerId,
+		[CoverholderId] = @CoverholderId,
+		[InceptionDate] = @InceptionDate,
+		[ExpiryDate] = @ExpiryDate,
+		[RisksTerritoryId] = @RisksTerritoryId,
+		[DomiciledTerritoryId] = @DomiciledTerritoryId,
+		[LimitsTerritoryId] = @LimitsTerritoryId,
+		[CreatedDTO] = GETUTCDATE(),
+		[CreatedById] = @UserId,
+		[UpdatedDTO] = GETUTCDATE(),
+		[UpdatedById] = @UserId
+	SET @BinderId = SCOPE_IDENTITY()
+	EXEC [apiBinder] @UserId, @BinderId
 END
 GO
 

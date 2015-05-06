@@ -1,0 +1,20 @@
+﻿<asql-form heading="{{Section.Title || 'New Section'}}" back="/binder/{{Section.BinderId}}">
+    <tabset>
+        <tab heading="Section Details">
+            <br />
+            <asql-label text="Title">
+                <input type="text" ng-model="Section.Title" required asql-control />
+            </asql-label>
+            <asql-label text="Class of Business">
+                <select ng-model="Section.ClassId" ng-options="Class.Id as Class.Description for Class in Classes" reequired asql-control>
+                    <option value=""></option>
+                </select>
+            </asql-label>
+            <asql-label text="Third-Party Adjuster">
+                <select ng-model="Section.AdjusterId" ng-options="Adjuster.AdjusterId as Adjuster.Adjuster for Adjuster in Adjusters" reequired asql-control>
+                    <option value=""></option>
+                </select>
+            </asql-label>
+        </tab>
+    </tabset>
+</asql-form>

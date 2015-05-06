@@ -75,6 +75,7 @@
     <Content Include="scripts\angular-sql\Controls.js" />
     <Content Include="scripts\angular-sql\LoginController.js" />
     <Content Include="scripts\angular-sql\Procedure.js" />
+    <Content Include="scripts\angular-sql\Section.js" />
     <Content Include="scripts\angular-sql\Utils.js" />
     <Content Include="scripts\ngStorage.min.js" />
     <Content Include="scripts\angular.min.js.map" />
@@ -131,6 +132,7 @@
     <Content Include="scripts\npm.js" />
     <Content Include="views\binder.html" />
     <Content Include="views\binders.html" />
+    <Content Include="views\bindersection.html" />
     <Content Include="views\companies.html" />
     <Content Include="views\company.html" />
     <Content Include="views\home.html" />

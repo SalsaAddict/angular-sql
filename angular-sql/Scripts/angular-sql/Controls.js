@@ -8,6 +8,12 @@
             $scope.asqlForm = { alert: null };
             this.canEdit = $scope.asqlForm.canEdit = function () { return angular.isDefined($scope.Save); };
             this.formDirty = function () { return $scope.asqlFormX.$dirty; };
+            $scope.$on("$routeChangeStart", function (event) {
+                if ($scope.asqlFormX.$dirty) {
+                    $scope.Error("Please save or undo your changes first.");
+                    event.preventDefault();
+                };
+            });
         },
         link: {
             pre: function (scope, iElement, iAttrs, controller) {
@@ -16,7 +22,7 @@
                 scope.asqlForm.editing = function () { return scope.asqlForm.canEdit() && scope.asqlFormX.$dirty; };
                 scope.asqlForm.hasError = function () { return scope.asqlForm.editing() && scope.asqlFormX.$invalid; };
                 scope.asqlForm.back = function () { if (iAttrs["back"]) $location.path(iAttrs["back"]); else $window.history.back(); };
-                scope.asqlForm.undo = function () { $route.reload(); };
+                scope.asqlForm.undo = function () { scope.asqlFormX.$setPristine(); $route.reload(); };
                 scope.asqlForm.save = function () {
                     scope.Save.Execute(scope)
                         .success(function (data) { scope.Success("Your changes were saved successfully."); scope.asqlFormX.$setPristine(); })

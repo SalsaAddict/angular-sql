@@ -7,6 +7,8 @@
 
 app.controller("BinderController", ["$scope", "$routeParams", "$route", "Procedure", function ($scope, $routeParams, $route, Procedure) {
 
+    $scope.IsNew = function () { return asqlIsBlank($routeParams.BinderId); };
+
     var apiBinder = new Procedure({
         Name: "apiBinder", UserId: true, Type: "singleton", ngModel: "Binder",
         Parameters: [{ Name: "BinderId", Type: "route", Required: true }]
@@ -36,6 +38,12 @@ app.controller("BinderController", ["$scope", "$routeParams", "$route", "Procedu
         ]
     });
     apiDomiciled.AutoExec($scope);
+
+    var apiSections = new Procedure({
+        Name: "apiBinderSections", UserId: true, Type: "array", ngModel: "Sections",
+        Parameters: [{ Name: "BinderId", Type: "route", Required: true }]
+    });
+    apiSections.Execute($scope);
 
     $scope.Save = new Procedure({
         Name: "apiBinderSave",

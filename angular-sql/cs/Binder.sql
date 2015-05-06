@@ -1,6 +1,15 @@
 USE [Advent]
 GO
 
+SET NOCOUNT ON
+GO
+
+IF OBJECT_ID(N'apiBinderSectionAdjuster', N'P') IS NOT NULL DROP PROCEDURE [apiBinderSectionAdjuster]
+IF OBJECT_ID(N'apiBinderSection', N'P') IS NOT NULL DROP PROCEDURE [apiBinderSection]
+IF OBJECT_ID(N'apiBinderSections', N'P') IS NOT NULL DROP PROCEDURE [apiBinderSections]
+IF OBJECT_ID(N'BinderSection', N'U') IS NOT NULL DROP TABLE [BinderSection]
+IF OBJECT_ID(N'apiClassOfBusiness', N'P') IS NOT NULL DROP PROCEDURE [apiClassOfBusiness]
+IF OBJECT_ID(N'ClassOfBusiness', N'U') IS NOT NULL DROP TABLE [ClassOfBusiness]
 IF OBJECT_ID(N'apiBinderDomiciled', N'P') IS NOT NULL DROP PROCEDURE [apiBinderDomiciled]
 IF OBJECT_ID(N'apiBinderBroker', N'P') IS NOT NULL DROP PROCEDURE [apiBinderBroker]
 IF OBJECT_ID(N'apiBinderCoverholder', N'P') IS NOT NULL DROP PROCEDURE [apiBinderCoverholder]
@@ -385,7 +394,8 @@ CREATE TABLE [Company] (
 		CONSTRAINT [UQ_Company_Name] UNIQUE ([CountryId], [Name]),
 		CONSTRAINT [FK_Company_Country] FOREIGN KEY ([CountryId]) REFERENCES [Country] ([Id]),
 		CONSTRAINT [FK_Company_User_CreatedById] FOREIGN KEY ([CreatedById]) REFERENCES [User] ([Id]),
-		CONSTRAINT [FK_Company_User_UpdatedById] FOREIGN KEY ([UpdatedById]) REFERENCES [User] ([Id])
+		CONSTRAINT [FK_Company_User_UpdatedById] FOREIGN KEY ([UpdatedById]) REFERENCES [User] ([Id]),
+		CONSTRAINT [CK_Company_UpdatedDTO] CHECK ([UpdatedDTO] >= [CreatedDTO])
 	)
 GO
 
@@ -561,7 +571,8 @@ CREATE TABLE [Binder] (
 		CONSTRAINT [FK_Binder_Territory_LimitsTerritoryId] FOREIGN KEY ([LimitsTerritoryId]) REFERENCES [Territory] ([Id]),
 		CONSTRAINT [FK_Binder_User_CreatedById] FOREIGN KEY ([CreatedById]) REFERENCES [User] ([Id]),
 		CONSTRAINT [FK_Binder_User_UpdatedById] FOREIGN KEY ([UpdatedById]) REFERENCES [User] ([Id]),
-		CONSTRAINT [CK_Binder_ExpiryDate] CHECK ([ExpiryDate] >= [InceptionDate])
+		CONSTRAINT [CK_Binder_ExpiryDate] CHECK ([ExpiryDate] >= [InceptionDate]),
+		CONSTRAINT [CK_Binder_UpdatedDTO] CHECK ([UpdatedDTO] >= [CreatedDTO])
 	)
 GO
 
@@ -735,3 +746,112 @@ BEGIN
 	RETURN
 END
 GO
+
+CREATE TABLE [ClassOfBusiness] (
+  [Id] NVARCHAR(5) NOT NULL,
+		[Description] NVARCHAR(255) NOT NULL,
+		CONSTRAINT [PK_ClassOfBusiness] PRIMARY KEY NONCLUSTERED ([Id]),
+		CONSTRAINT [UQ_ClassOfBusiness_Description] UNIQUE CLUSTERED ([Description])
+	)
+GO
+
+INSERT INTO [ClassOfBusiness] ([Id], [Description])
+VALUES
+ (N'MOTOR', N'Motor'),
+	(N'PROP', N'Property'),
+	(N'BI', N'Business Interruption'),
+	(N'PROD', N'Product Liability'),
+	(N'PUB', N'Public Liability'),
+	(N'EMP', N'Employers Liability')
+GO
+
+CREATE PROCEDURE [apiClassOfBusiness](@UserId INT)
+AS
+BEGIN
+ SET NOCOUNT ON
+	SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED
+	SELECT [Id], [Description] FROM [ClassOfBusiness] ORDER BY [Description]
+	RETURN
+END
+GO
+
+CREATE TABLE [BinderSection] (
+  [Id] INT NOT NULL IDENTITY (1, 1),
+  [BinderId] INT NOT NULL,
+		[ClassId] NVARCHAR(5) NOT NULL,
+		[Title] NVARCHAR(255) NOT NULL,
+		[AdjusterId] INT NOT NULL,
+		[CreatedDTO] DATETIMEOFFSET NOT NULL CONSTRAINT [DF_BinderSection_CreatedDTO] DEFAULT (GETUTCDATE()),
+		[CreatedById] INT NOT NULL,
+		[UpdatedDTO] DATETIMEOFFSET NOT NULL CONSTRAINT [DF_BinderSection_UpdatedDTO] DEFAULT (GETUTCDATE()),
+		[UpdatedById] INT NOT NULL,
+		CONSTRAINT [PK_BinderSection] PRIMARY KEY NONCLUSTERED ([Id]),
+		CONSTRAINT [UQ_BinderSection_Title] UNIQUE CLUSTERED ([BinderId], [Title]),
+		CONSTRAINT [FK_BinderSection_Binder] FOREIGN KEY ([BinderId]) REFERENCES [Binder] ([Id]) ON DELETE CASCADE,
+		CONSTRAINT [FK_BinderSection_ClassOfBusiness] FOREIGN KEY ([ClassId]) REFERENCES [ClassOfBusiness] ([Id]) ON UPDATE CASCADE,
+		CONSTRAINT [FK_BinderSection_User_CreatedById] FOREIGN KEY ([CreatedById]) REFERENCES [User] ([Id]),
+		CONSTRAINT [FK_BinderSection_User_UpdatedById] FOREIGN KEY ([UpdatedById]) REFERENCES [User] ([Id]),
+		CONSTRAINT [CK_BinderSection_UpdatedDTO] CHECK ([UpdatedDTO] >= [CreatedDTO])
+	)
+GO
+
+INSERT INTO [BinderSection] ([BinderId], [ClassId], [Title], [AdjusterId], [CreatedById], [UpdatedById])
+VALUES
+ (1, N'PROP', N'Property', 1, 1, 1),
+	(1, N'BI', N'Business Interruption', 1, 1, 1)
+GO
+
+CREATE PROCEDURE [apiBinderSections] (@UserId INT, @BinderId INT)
+AS
+BEGIN
+ SET NOCOUNT ON
+	SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED
+	SELECT
+	 [SectionId] = bs.[Id],
+		[Title] = bs.[Title],
+		[Class] = cob.[Description]
+	FROM [Binder] b
+	 JOIN [BinderSection] bs ON b.[Id] = bs.[BinderId]
+		JOIN [ClassOfBusiness] cob ON bs.[ClassId] = cob.[Id]
+	WHERE b.[Id] = @BinderId
+	ORDER BY bs.[Title]
+	RETURN
+END
+GO
+
+CREATE PROCEDURE [apiBinderSection](@UserId INT, @SectionId INT)
+AS
+BEGIN
+ SET NOCOUNT ON
+	SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED
+	SELECT
+	 [SectionId] = bs.[Id],
+		[BinderId] = bs.[BinderId],
+		[ClassId] = bs.[ClassId],
+		[Title] = bs.[Title],
+		[AdjusterId] = bs.[AdjusterId]
+	FROM [BinderSection] bs
+	WHERE bs.[Id] = @SectionId
+	RETURN
+END
+GO
+
+CREATE PROCEDURE [apiBinderSectionAdjuster](@UserId INT, @SectionId INT)
+AS
+BEGIN
+ SET NOCOUNT ON
+	SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED
+ SELECT
+	 [AdjusterId] = c.[Id],
+		[Adjuster] = c.[Name] + N' (' + c.[CountryId] + N')'
+	FROM [Company] c
+	 LEFT JOIN [BinderSection] bs ON @SectionId = bs.[Id] AND c.[Id] = bs.[AdjusterId]
+	WHERE c.[TPA] & c.[Active] = 1
+	 OR bs.[Id] IS NOT NULL
+	ORDER BY c.[Name], c.[CountryId]
+	RETURN
+END
+GO
+
+EXEC [apiBinderSection] 1, 1
+EXEC [apiBinderSectionAdjuster] 1, 1

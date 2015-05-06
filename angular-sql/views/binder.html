@@ -28,7 +28,7 @@
                 <select ng-model="Binder.DomiciledTerritoryId" ng-options="Territory.TerritoryId as Territory.Territory for Territory in Territories" required asql-control>
                     <option value=""></option>
                 </select>
-                <div class="text-danger" ng-hide="Domiciled.Valid"><small>This territory is not valid for the selected coverholder.</small></div>
+                <div class="help-block" ng-hide="Domiciled.Valid">Not valid for the selected coverholder.</div>
                 <input type="hidden" required ng-model="Domiciled.Valid" />
             </asql-label>
             <asql-label text="Territorial Limits">
@@ -36,6 +36,20 @@
                     <option value=""></option>
                 </select>
             </asql-label>
+        </tab>
+        <tab heading="Sections" ng-hide="IsNew()">
+            <br />
+            <div class="list-group">
+                <a ng-href="#/binder/{{Binder.BinderId}}/section" class="list-group-item">
+                    <span class="text-primary">
+                        <i class="fa fa-plus-circle"></i> New Section
+                    </span>
+                </a>
+                <a ng-repeat="Section in Sections" ng-href="#/binder/{{Binder.BinderId}}/section/{{Section.SectionId}}" class="list-group-item">
+                    <h4 class="list-group-item-heading">{{Section.Title}}</h4>
+                    <p class="list-group-item-text">{{Section.Class}}</p>
+                </a>
+            </div>
         </tab>
     </tabset>
 </asql-form>

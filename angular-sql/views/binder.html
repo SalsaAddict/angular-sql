@@ -5,12 +5,12 @@
             <asql-label text="Agreement Number"><input type="text" ng-model="Binder.Reference" asql-control /></asql-label>
             <asql-label text="Unique Market Reference"><input type="text" ng-model="Binder.UMR" required asql-control /></asql-label>
             <asql-label text="Coverholder">
-                <select ng-model="Binder.CoverholderId" ng-options="Coverholder.Id as Coverholder.Name for Coverholder in Coverholders" required asql-control>
+                <select ng-model="Binder.CoverholderId" ng-options="Coverholder.CoverholderId as Coverholder.Coverholder for Coverholder in Coverholders" required asql-control>
                     <option value=""></option>
                 </select>
             </asql-label>
             <asql-label text="Broker">
-                <select ng-model="Binder.BrokerId" ng-options="Broker.Id as Broker.Name for Broker in Brokers" required asql-control>
+                <select ng-model="Binder.BrokerId" ng-options="Broker.BrokerId as Broker.Broker for Broker in Brokers" required asql-control>
                     <option value=""></option>
                 </select>
             </asql-label>
@@ -20,17 +20,19 @@
         <tab heading="Territories">
             <br />
             <asql-label text="Risks Located in">
-                <select ng-model="Binder.RisksTerritoryId" ng-options="Territory.Id as Territory.Name for Territory in Territories" required asql-control>
+                <select ng-model="Binder.RisksTerritoryId" ng-options="Territory.TerritoryId as Territory.Territory for Territory in Territories" required asql-control>
                     <option value=""></option>
                 </select>
             </asql-label>
             <asql-label text="Insureds Domiciled in">
-                <select ng-model="Binder.DomiciledTerritoryId" ng-options="Territory.Id as Territory.Name for Territory in Territories" required asql-control>
+                <select ng-model="Binder.DomiciledTerritoryId" ng-options="Territory.TerritoryId as Territory.Territory for Territory in Territories" required asql-control>
                     <option value=""></option>
                 </select>
+                <div class="text-danger" ng-hide="Domiciled.Valid"><small>This territory is not valid for the selected coverholder.</small></div>
+                <input type="hidden" required ng-model="Domiciled.Valid" />
             </asql-label>
             <asql-label text="Territorial Limits">
-                <select ng-model="Binder.LimitsTerritoryId" ng-options="Territory.Id as Territory.Name for Territory in Territories" required asql-control>
+                <select ng-model="Binder.LimitsTerritoryId" ng-options="Territory.TerritoryId as Territory.Territory for Territory in Territories" required asql-control>
                     <option value=""></option>
                 </select>
             </asql-label>

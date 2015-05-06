@@ -1,4 +1,4 @@
-﻿app.factory("Procedure", ["$routeParams", "$parse", "$http", function ($routeParams, $parse, $http) {
+﻿app.factory("Procedure", ["$log", "$routeParams", "$parse", "$http", function ($log, $routeParams, $parse, $http) {
     function Procedure(Options) {
 
         var self = this;
@@ -51,13 +51,14 @@
         };
 
         self.Execute = function (Scope) {
+            var PostData = self.PostData(Scope);
             var ngModel = null;
             if (!asqlIsBlank(Config.ngModel)) {
                 ngModel = $parse(Config.ngModel);
                 ngModel.assign(Scope, self.Empty());
             };
-            var PostData = self.PostData(Scope);
             if (!asqlIsBlank(PostData)) {
+                $log.debug("Procedure.Execute:" + Config.Name);
                 return $http.post("exec.ashx", PostData)
                     .success(function (Data) {
                         var Result = self.Empty();

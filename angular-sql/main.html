@@ -80,5 +80,15 @@
             </div>
         </form>
     </script>
+    <script type="text/ng-template" id="Success.html">
+        <div class="modal-header"><h4 class="modal-title"><span class="text-success"><i class="fa fa-check-circle"></i> Success</span></h4></div>
+        <div class="modal-body">{{Message}}</div>
+        <div class="modal-footer"><button class="btn btn-primary" ng-click="OK()">OK</button></div>
+    </script>
+    <script type="text/ng-template" id="Error.html">
+        <div class="modal-header"><h4 class="modal-title"><span class="text-danger"><i class="fa fa-exclamation-circle"></i> Error</span></h4></div>
+        <div class="modal-body">{{Message}}</div>
+        <div class="modal-footer"><button class="btn btn-primary" ng-click="OK()">OK</button></div>
+    </script>
 </body>
 </html>

@@ -8,12 +8,6 @@
             $scope.asqlForm = { alert: null };
             this.canEdit = $scope.asqlForm.canEdit = function () { return angular.isDefined($scope.Save); };
             this.formDirty = function () { return $scope.asqlFormX.$dirty; };
-            $scope.$on("$routeChangeStart", function (event) {
-                if ($scope.asqlFormX.$dirty) {
-                    $scope.asqlForm.alert = { type: "danger", message: "Please save or undo your changes first." };
-                    event.preventDefault();
-                };
-            });
         },
         link: {
             pre: function (scope, iElement, iAttrs, controller) {
@@ -25,8 +19,8 @@
                 scope.asqlForm.undo = function () { $route.reload(); };
                 scope.asqlForm.save = function () {
                     scope.Save.Execute(scope)
-                        .success(function (data) { scope.asqlForm.alert = { type: "success", message: "Saved successfully." }; scope.asqlFormX.$setPristine(); })
-                        .error(function (response, status) { scope.asqlForm.alert = { type: "danger", message: response }; });
+                        .success(function (data) { scope.Success("Your changes were saved successfully."); scope.asqlFormX.$setPristine(); })
+                        .error(function (response, status) { scope.Error(response); });
                 };
             }
         }
@@ -70,3 +64,4 @@ app.directive("asqlControl", ["$filter", function ($filter) {
         }
     };
 }]);
+

@@ -1,9 +1,10 @@
 USE [Advent]
 GO
 
+IF OBJECT_ID(N'apiBinderDomiciled', N'P') IS NOT NULL DROP PROCEDURE [apiBinderDomiciled]
 IF OBJECT_ID(N'apiBinderBroker', N'P') IS NOT NULL DROP PROCEDURE [apiBinderBroker]
 IF OBJECT_ID(N'apiBinderCoverholder', N'P') IS NOT NULL DROP PROCEDURE [apiBinderCoverholder]
-IF OBJECT_ID(N'apiBinderInsert', N'P') IS NOT NULL DROP PROCEDURE [apiBinderInsert]
+IF OBJECT_ID(N'apiBinderSave', N'P') IS NOT NULL DROP PROCEDURE [apiBinderSave]
 IF OBJECT_ID(N'apiBinder', N'P') IS NOT NULL DROP PROCEDURE [apiBinder]
 IF OBJECT_ID(N'apiBinders', N'P') IS NOT NULL DROP PROCEDURE [apiBinders]
 IF OBJECT_ID(N'Binder', N'U') IS NOT NULL DROP TABLE [Binder]
@@ -13,9 +14,9 @@ IF OBJECT_ID(N'apiCompany', N'P') IS NOT NULL DROP PROCEDURE [apiCompany]
 IF OBJECT_ID(N'apiCompanies', N'P') IS NOT NULL DROP PROCEDURE [apiCompanies]
 IF OBJECT_ID(N'CompanyRole', N'U') IS NOT NULL DROP TABLE [CompanyRole]
 IF OBJECT_ID(N'Company', N'U') IS NOT NULL DROP TABLE [Company]
+IF OBJECT_ID(N'apiTerritories', N'P') IS NOT NULL DROP PROCEDURE [apiTerritories]
 IF OBJECT_ID(N'vwTerritoryCountries', N'V') IS NOT NULL DROP VIEW [vwTerritoryCountries]
 IF OBJECT_ID(N'TerritoryCountry', N'U') IS NOT NULL DROP TABLE [TerritoryCountry]
-IF OBJECT_ID(N'apiTerritories', N'P') IS NOT NULL DROP PROCEDURE [apiTerritories]
 IF OBJECT_ID(N'Territory', N'U') IS NOT NULL DROP TABLE [Territory]
 IF OBJECT_ID(N'apiCountries', N'P') IS NOT NULL DROP PROCEDURE [apiCountries]
 IF OBJECT_ID(N'Country', N'U') IS NOT NULL DROP TABLE [Country]
@@ -302,16 +303,6 @@ CREATE TABLE [Territory] (
 	)
 GO
 
-CREATE PROCEDURE [apiTerritories]
-AS
-BEGIN
- SET NOCOUNT ON
-	SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED
-	SELECT [Id], [Name] FROM [Territory] ORDER BY [Name]
-	RETURN
-END
-GO
-
 CREATE TABLE [TerritoryCountry] (
   [TerritoryId] INT NOT NULL,
 		[Type] BIT NOT NULL,
@@ -338,7 +329,7 @@ VALUES
  (1, 1, N'GB'),
 	(2, 1, N'US'),
 	(3, 0, N'GB'),
-	(3, 0, N'US')
+	(4, 0, N'US')
 GO
 
 CREATE VIEW [vwTerritoryCountries]
@@ -355,6 +346,24 @@ WHERE (
 			OR (t.[Type] = 1 AND tc.[CountryId] IS NOT NULL)
 			OR (t.[Type] = 0 AND tc.[CountryId] IS NULL)
   )
+GO
+
+CREATE PROCEDURE [apiTerritories](@CountryId NCHAR(2) = NULL)
+AS
+BEGIN
+ SET NOCOUNT ON
+	SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED
+	IF @CountryId IS NULL
+	 SELECT [TerritoryId] = [Id], [Territory] = [Name]
+		FROM [Territory]
+		ORDER BY [Name]
+	ELSE
+	 SELECT [TerritoryId], [Territory]
+		FROM [vwTerritoryCountries]
+		WHERE [CountryId] = @CountryId
+		ORDER BY [Territory]
+	RETURN
+END
 GO
 
 CREATE TABLE [Company] (
@@ -421,7 +430,7 @@ BEGIN
 END
 GO
 
-CREATE PROCEDURE [apiCompany](@UserId INT, @CountryId NCHAR(2), @Name NVARCHAR(255))
+CREATE PROCEDURE [apiCompany](@UserId INT, @CompanyId INT)
 AS
 BEGIN
  SET NOCOUNT ON
@@ -435,10 +444,10 @@ BEGIN
 		[LBR] = cmp.[LBR],
 		[COV] = cmp.[COV],
 		[CAR] = cmp.[CAR],
-		[TPA] = cmp.[TPA]
+		[TPA] = cmp.[TPA],
+		[UpdatedDTO] = cmp.[UpdatedDTO]
 	FROM [Company] cmp
-	WHERE cmp.[CountryId] = @CountryId
-	 AND cmp.[Name] = @Name
+	WHERE cmp.[Id] = @CompanyId
 	RETURN
 END
 GO
@@ -455,15 +464,15 @@ GO
 
 CREATE PROCEDURE [apiCompanySave](
   @CompanyId INT = NULL,
-		@Name NVARCHAR(255),
+		@Name NVARCHAR(255) = NULL,
 		@Address NVARCHAR(255) = NULL,
 		@Postcode NVARCHAR(25) = NULL,
-		@CountryId NCHAR(2) = N'GB',
-		@LBR BIT = 0,
-		@COV BIT = 0,
-		@CAR BIT = 0,
-		@TPA BIT = 0,
-		@Active BIT = 1,
+		@CountryId NCHAR(2) = NULL,
+		@LBR BIT = NULL,
+		@COV BIT = NULL,
+		@CAR BIT = NULL,
+		@TPA BIT = NULL,
+		@Active BIT = NULL,
 		@UserId INT
  )
 AS
@@ -480,7 +489,9 @@ BEGIN
 				[COV],
 				[CAR],
 				[TPA],
+				[CreatedDTO],
 				[CreatedById],
+				[UpdatedDTO],
 				[UpdatedById],
 				[Active]
 			)
@@ -488,14 +499,16 @@ BEGIN
 		  @Name,
 				@Address,
 				@Postcode,
-				@CountryId,
-				@LBR,
-				@COV,
-				@CAR,
-				@TPA,
+				ISNULL(@CountryId, N'GB'),
+				ISNULL(@LBR, 0),
+				ISNULL(@COV, 0),
+				ISNULL(@CAR, 0),
+				ISNULL(@TPA, 0),
+				GETUTCDATE(),
 				@UserId,
+				GETUTCDATE(),
 				@UserId,
-				@Active
+				ISNULL(@Active, 1)
 			)
 		SET @CompanyId = SCOPE_IDENTITY()
 
@@ -503,22 +516,22 @@ BEGIN
 
 	 UPDATE [Company]
 		SET
-		 [Name] = @Name,
-			[Address] = @Address,
-			[Postcode] = @Postcode,
-			[CountryId] = @CountryId,
-			[Active] = @Active,
-			[LBR] = @LBR,
-			[COV] = @COV,
-			[CAR] = @CAR,
-			[TPA] = @TPA,
+		 [Name] = ISNULL(@Name, [Name]),
+			[Address] = ISNULL(@Address, [Address]),
+			[Postcode] = ISNULL(@Postcode, [Postcode]),
+			[CountryId] = ISNULL(@CountryId, [CountryId]),
+			[LBR] = ISNULL(@LBR, [LBR]),
+			[COV] = ISNULL(@COV, [LBR]),
+			[CAR] = ISNULL(@CAR, [CAR]),
+			[TPA] = ISNULL(@TPA, [TPA]),
 			[UpdatedDTO] = GETUTCDATE(),
-			[UpdatedById] = @UserId
+			[UpdatedById] = @UserId,
+			[Active] = ISNULL(@Active, [Active])
 		WHERE [Id] = @CompanyId
 
 	END
 
-	EXEC [apiCompany] @UserId, @CountryId, @Name
+	EXEC [apiCompany] @UserId, @CompanyId
 
 	RETURN
 END
@@ -554,8 +567,8 @@ GO
 
 INSERT INTO [Binder] ([UMR], [Reference], [BrokerId], [CoverholderId], [InceptionDate], [ExpiryDate], [RisksTerritoryId], [DomiciledTerritoryId], [LimitsTerritoryId], [CreatedById], [UpdatedById])
 VALUES
- (N'UMR0001', N'REF00001', 1, 2, N'2012-01-01', N'2012-12-31', 0, 1, 3, 1, 1),
-	(N'UMR0002', N'REF00002', 2, 1, N'2013-07-01', N'2014-06-30', 0, 2, 4, 1, 1)
+ (N'UMR0001', N'REF00001', 1, 2, N'2012-01-01', N'2012-12-31', 0, 2, 4, 1, 1),
+	(N'UMR0002', N'REF00002', 2, 1, N'2013-07-01', N'2014-06-30', 0, 1, 3, 1, 1)
 GO
 
 CREATE PROCEDURE [apiBinders](@UserId INT)
@@ -585,68 +598,91 @@ BEGIN
  SET NOCOUNT ON
 	SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED
 	SELECT
-	 [Id],
-		[UMR], 
-		[Reference],
-		[BrokerId],
-		[CoverholderId],
-		[InceptionDate],
-		[ExpiryDate],
-		[RisksTerritoryId],
-		[DomiciledTerritoryId],
-		[LimitsTerritoryId]
-	FROM [Binder]
-	WHERE [Id] = @BinderId
+	 [BinderId] = b.[Id],
+		[UMR] = b.[UMR], 
+		[Reference] = b.[Reference],
+		[BrokerId] = b.[BrokerId],
+		[CoverholderId] = b.[CoverholderId],
+		[InceptionDate] = b.[InceptionDate],
+		[ExpiryDate] = b.[ExpiryDate],
+		[RisksTerritoryId] = b.[RisksTerritoryId],
+		[DomiciledTerritoryId] = b.[DomiciledTerritoryId],
+		[LimitsTerritoryId] = b.[LimitsTerritoryId]
+	FROM [Binder] b
+	WHERE b.[Id] = @BinderId
 	RETURN
 END
 GO
 
-CREATE PROCEDURE [apiBinderInsert](
-  @UMR NVARCHAR(50),
+CREATE PROCEDURE [apiBinderSave](
+  @BinderId INT = NULL,
+  @UMR NVARCHAR(50) = NULL,
 		@Reference NVARCHAR(50) = NULL,
-		@BrokerId INT,
-		@CoverholderId INT,
-		@InceptionDate DATE,
-		@ExpiryDate DATE,
-		@RisksTerritoryId INT,
-		@DomiciledTerritoryId INT,
-		@LimitsTerritoryId INT,
+		@BrokerId INT = NULL,
+		@CoverholderId INT = NULL,
+		@InceptionDate DATE = NULL,
+		@ExpiryDate DATE = NULL,
+		@RisksTerritoryId INT = NULL,
+		@DomiciledTerritoryId INT = NULL,
+		@LimitsTerritoryId INT = NULL,
   @UserId INT
 	)
 AS
 BEGIN
- DECLARE @BinderId INT
-	INSERT INTO [Binder] (
-	  [UMR],
-			[Reference],
-			[BrokerId],
-			[CoverholderId],
-			[InceptionDate],
-			[ExpiryDate],
-			[RisksTerritoryId],
-			[DomiciledTerritoryId],
-			[LimitsTerritoryId],
-			[CreatedDTO],
-			[CreatedById],
-			[UpdatedDTO],
-			[UpdatedById]
-	 )
-	SELECT
-	 [UMR] = @UMR,
-  [Reference] = @Reference,
-		[BrokerId] = @BrokerId,
-		[CoverholderId] = @CoverholderId,
-		[InceptionDate] = @InceptionDate,
-		[ExpiryDate] = @ExpiryDate,
-		[RisksTerritoryId] = @RisksTerritoryId,
-		[DomiciledTerritoryId] = @DomiciledTerritoryId,
-		[LimitsTerritoryId] = @LimitsTerritoryId,
-		[CreatedDTO] = GETUTCDATE(),
-		[CreatedById] = @UserId,
-		[UpdatedDTO] = GETUTCDATE(),
-		[UpdatedById] = @UserId
-	SET @BinderId = SCOPE_IDENTITY()
+ IF @BinderId IS NULL BEGIN
+
+		INSERT INTO [Binder] (
+				[UMR],
+				[Reference],
+				[BrokerId],
+				[CoverholderId],
+				[InceptionDate],
+				[ExpiryDate],
+				[RisksTerritoryId],
+				[DomiciledTerritoryId],
+				[LimitsTerritoryId],
+				[CreatedDTO],
+				[CreatedById],
+				[UpdatedDTO],
+				[UpdatedById]
+			)
+		SELECT
+			[UMR] = @UMR,
+			[Reference] = @Reference,
+			[BrokerId] = @BrokerId,
+			[CoverholderId] = @CoverholderId,
+			[InceptionDate] = @InceptionDate,
+			[ExpiryDate] = @ExpiryDate,
+			[RisksTerritoryId] = @RisksTerritoryId,
+			[DomiciledTerritoryId] = @DomiciledTerritoryId,
+			[LimitsTerritoryId] = @LimitsTerritoryId,
+			[CreatedDTO] = GETUTCDATE(),
+			[CreatedById] = @UserId,
+			[UpdatedDTO] = GETUTCDATE(),
+			[UpdatedById] = @UserId
+		SET @BinderId = SCOPE_IDENTITY()
+
+	END ELSE BEGIN
+
+		UPDATE [Binder]
+		SET
+			[UMR] = ISNULL(@UMR, [UMR]),
+			[Reference] = ISNULL(@Reference, [Reference]),
+			[BrokerId] = ISNULL(@BrokerId, [BrokerId]),
+			[CoverholderId] = ISNULL(@CoverholderId, [CoverholderId]),
+			[InceptionDate] = ISNULL(@InceptionDate, [InceptionDate]),
+			[ExpiryDate] = ISNULL(@ExpiryDate, [ExpiryDate]),
+			[RisksTerritoryId] = ISNULL(@RisksTerritoryId, [RisksTerritoryId]),
+			[DomiciledTerritoryId] = ISNULL(@DomiciledTerritoryId, [DomiciledTerritoryId]),
+			[LimitsTerritoryId] = ISNULL(@LimitsTerritoryId, [LimitsTerritoryId]),
+			[UpdatedDTO] = GETUTCDATE(),
+			[UpdatedById] = @UserId
+		WHERE [Id] = @BinderId
+
+	END
+
 	EXEC [apiBinder] @UserId, @BinderId
+
 END
 GO
 
@@ -656,8 +692,8 @@ BEGIN
  SET NOCOUNT ON
 	SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED
  SELECT
-	 [Id] = c.[Id],
-		[Name] = c.[Name] + N' (' + c.[CountryId] + N')'
+	 [CoverholderId] = c.[Id],
+		[Coverholder] = c.[Name] + N' (' + c.[CountryId] + N')'
 	FROM [Company] c
 	 LEFT JOIN [Binder] b ON @BinderId = b.[Id] AND c.[Id] = b.[CoverholderId]
 	WHERE c.[COV] & c.[Active] = 1
@@ -673,13 +709,29 @@ BEGIN
  SET NOCOUNT ON
 	SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED
  SELECT
-	 [Id] = c.[Id],
-		[Name] = c.[Name] + N' (' + c.[CountryId] + N')'
+	 [BrokerId] = c.[Id],
+		[Broker] = c.[Name] + N' (' + c.[CountryId] + N')'
 	FROM [Company] c
 	 LEFT JOIN [Binder] b ON @BinderId = b.[Id] AND c.[Id] = b.[BrokerId]
 	WHERE c.[LBR] & c.[Active] = 1
 	 OR b.[Id] IS NOT NULL
 	ORDER BY c.[Name], c.[CountryId]
+	RETURN
+END
+GO
+
+CREATE PROCEDURE [apiBinderDomiciled](@UserId INT, @CoverholderId INT, @DomiciledTerritoryId INT)
+AS
+BEGIN
+ SET NOCOUNT ON
+	SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED
+	SELECT [Valid] = CONVERT(BIT, CASE WHEN EXISTS (
+	  SELECT 1
+			FROM [Company] cmp
+			 JOIN [vwTerritoryCountries] tc ON cmp.[CountryId] = tc.[CountryId]
+			WHERE cmp.[Id] = @CoverholderId
+			 AND tc.[TerritoryId] = @DomiciledTerritoryId
+		) THEN 1 END)
 	RETURN
 END
 GO

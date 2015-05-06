@@ -6,11 +6,9 @@ app.config(["$logProvider", "$routeProvider", function ($logProvider, $routeProv
         .when("/exec", { caseInsensitiveMatch: true, templateUrl: "views/exec.html", controller: "ExecController" })
         .when("/home", { caseInsensitiveMatch: true, templateUrl: "views/home.html" })
         .when("/companies", { caseInsensitiveMatch: true, templateUrl: "views/companies.html", controller: "CompaniesController" })
-        .when("/company/:New", { caseInsensitiveMatch: true, templateUrl: "views/company.html", controller: "CompanyController" })
-        .when("/company/:CountryId/:Name", { caseInsensitiveMatch: true, templateUrl: "views/company.html", controller: "CompanyController" })
+        .when("/company/:CompanyId?", { caseInsensitiveMatch: true, templateUrl: "views/company.html", controller: "CompanyController" })
         .when("/binders", { caseInsensitiveMatch: true, templateUrl: "views/binders.html", controller: "BindersController" })
-        .when("/binder", { caseInsensitiveMatch: true, templateUrl: "views/binder.html", controller: "BinderController" })
-        .when("/binder/:BinderId", { caseInsensitiveMatch: true, templateUrl: "views/binder.html", controller: "BinderController" })
+        .when("/binder/:BinderId?", { caseInsensitiveMatch: true, templateUrl: "views/binder.html", controller: "BinderController" })
         .otherwise({ redirectTo: "/home" });
 }]);
 
@@ -40,6 +38,28 @@ app.run(["$rootScope", "$route", "$localStorage", "$modal", function ($rootScope
     $rootScope.Logout = function () {
         $rootScope.navBarCollapsed = true;
         $localStorage.Token = null;
-    }
+    };
+
+    $rootScope.Success = function (Message) {
+        var SuccessModal = $modal.open({
+            templateUrl: "Success.html",
+            controller: ["$scope", "$modalInstance", "Message", function ($scope, $modalInstance, Message) {
+                $scope.Message = Message;
+                $scope.OK = function () { $modalInstance.close(); };
+            }],
+            resolve: { Message: function () { return Message; } }
+        });
+    };
+
+    $rootScope.Error = function (Message) {
+        var SuccessModal = $modal.open({
+            templateUrl: "Error.html",
+            controller: ["$scope", "$modalInstance", "Message", function ($scope, $modalInstance, Message) {
+                $scope.Message = Message;
+                $scope.OK = function () { $modalInstance.close(); };
+            }],
+            resolve: { Message: function () { return Message; } }
+        });
+    };
 
 }]);

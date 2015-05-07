@@ -5,14 +5,28 @@
             <asql-label text="Agreement Number"><input type="text" ng-model="Binder.Reference" asql-control /></asql-label>
             <asql-label text="Unique Market Reference"><input type="text" ng-model="Binder.UMR" required asql-control /></asql-label>
             <asql-label text="Coverholder">
-                <select ng-model="Binder.CoverholderId" ng-options="Coverholder.CoverholderId as Coverholder.Coverholder for Coverholder in Coverholders" required asql-control>
-                    <option value=""></option>
-                </select>
+                <div class="input-group">
+                    <select ng-model="Binder.CoverholderId" ng-options="Coverholder.CoverholderId as Coverholder.Coverholder for Coverholder in Coverholders" required asql-control>
+                        <option value=""></option>
+                    </select>
+                    <span class="input-group-btn">
+                        <a ng-href="#/company/{{Binder.CoverholderId}}" target="_blank" class="btn btn-default" ng-disabled="!Binder.CoverholderId">
+                            <i class="fa fa-info-circle"></i>
+                        </a>
+                    </span>
+                </div>
             </asql-label>
             <asql-label text="Broker">
-                <select ng-model="Binder.BrokerId" ng-options="Broker.BrokerId as Broker.Broker for Broker in Brokers" required asql-control>
-                    <option value=""></option>
-                </select>
+                <div class="input-group">
+                    <select ng-model="Binder.BrokerId" ng-options="Broker.BrokerId as Broker.Broker for Broker in Brokers" required asql-control>
+                        <option value=""></option>
+                    </select>
+                    <span class="input-group-btn">
+                        <a ng-href="#/company/{{Binder.BrokerId}}" targ target="_blank" class="btn btn-default" ng-disabled="!Binder.BrokerId">
+                            <i class="fa fa-info-circle"></i>
+                        </a>
+                    </span>
+                </div>
             </asql-label>
             <asql-label text="Inception Date"><input type="date" ng-model="Binder.InceptionDate" required asql-control /></asql-label>
             <asql-label text="Expiry Date"><input type="date" ng-model="Binder.ExpiryDate" required asql-control /></asql-label>

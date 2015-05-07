@@ -1,7 +1,10 @@
-﻿app.controller("BindersController", ["$scope", "Procedure", function ($scope, Procedure) {
+﻿app.controller("BindersController", ["$scope", "$location", "Procedure", function ($scope, $location, Procedure) {
 
     var apiBinders = new Procedure({ Name: "apiBinders", UserId: true, Type: "array", ngModel: "Binders" });
     apiBinders.Execute($scope);
+
+    $scope.New = function () { $location.path("/binder"); };
+    $scope.View = function (BinderId) { $location.path("/binder/" + BinderId); };
 
 }]);
 

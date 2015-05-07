@@ -41,6 +41,7 @@ CREATE TABLE [Country] (
 	)
 GO
 
+-- ##TESTDATA
 INSERT INTO [Country] ([Name], [Id])
 VALUES
  (N'Afghanistan', N'AF'),
@@ -324,6 +325,7 @@ CREATE TABLE [TerritoryCountry] (
 	)
 GO
 
+-- ##TESTDATA
 SET IDENTITY_INSERT [Territory] ON
 INSERT INTO [Territory] ([Id], [Name], [Type])
 VALUES
@@ -335,6 +337,7 @@ VALUES
 SET IDENTITY_INSERT [Territory] OFF
 GO
 
+-- ##TESTDATA
 INSERT INTO [TerritoryCountry] ([TerritoryId], [Type], [CountryId])
 VALUES
  (1, 1, N'GB'),
@@ -402,6 +405,7 @@ CREATE TABLE [Company] (
 	)
 GO
 
+-- ##TESTDATA
 INSERT INTO [Company] ([Name], [CountryId], [LBR], [COV], [CAR], [TPA], [CreatedById], [UpdatedById])
 SELECT [Name], [CountryId], [LBR], [COV], [CAR], [TPA], 1, 1
 FROM (VALUES
@@ -978,6 +982,7 @@ CREATE TABLE [Binder] (
 	)
 GO
 
+-- ##TESTDATA
 INSERT INTO [Binder] ([UMR], [Reference], [BrokerId], [CoverholderId], [InceptionDate], [ExpiryDate], [RisksTerritoryId], [DomiciledTerritoryId], [LimitsTerritoryId], [CreatedById], [UpdatedById])
 SELECT
  [UMR] = N'UMR' + RIGHT(N'000000' + CONVERT(NVARCHAR(10), v.[number]), 6),
@@ -1014,7 +1019,7 @@ BEGIN
 		[ExpiryDate] = b.[ExpiryDate]
 	FROM [Binder] b
 	 JOIN [Company] lbr ON b.[BrokerId] = lbr.[Id]
-		JOIN [Company] cov ON b.[BrokerId] = cov.[Id]
+		JOIN [Company] cov ON b.[CoverholderId] = cov.[Id]
 	ORDER BY cov.[Name], b.[ExpiryDate] DESC, b.[UMR]
 	RETURN
 END
@@ -1212,10 +1217,20 @@ CREATE TABLE [BinderSection] (
 	)
 GO
 
+-- ##TESTDATA
 INSERT INTO [BinderSection] ([BinderId], [ClassId], [Title], [AdministratorId], [CreatedById], [UpdatedById])
-VALUES
- (1, N'PROP', N'Buildings', 1, 1, 1),
-	(1, N'BI', N'Business Cover', 1, 1, 1)
+SELECT
+ [BinderId] = b.[Id],
+	[ClassId] = cob.[Id],
+	[Title] = cob.[Description],
+	[AdministratorId] = (SELECT TOP 1 [Id] FROM [Company] WHERE [TPA] = 1 AND ISNULL(b.[Id], cob.[Id]) IS NOT NULL ORDER BY NEWID()),
+	[CreatedById] = 1,
+	[UpdatedById] = 1
+FROM [Binder] b
+ CROSS APPLY (SELECT COUNT(*) FROM [ClassOfBusiness]) cobc ([Count])
+	CROSS APPLY (SELECT [Id], [Description], [Row] = ROW_NUMBER() OVER (ORDER BY NEWID()) FROM [ClassOfBusiness]) cob
+ CROSS APPLY (SELECT TOP 1 [number] FROM [master]..[spt_values] WHERE [type] = N'P' AND [number] BETWEEN 1 AND cobc.[Count] AND ISNULL(b.[Id], cob.[Id]) IS NOT NULL ORDER BY NEWID()) s ([Count])
+WHERE cob.[Row] <= s.[Count]
 GO
 
 CREATE TABLE [BinderSectionCarrier] (

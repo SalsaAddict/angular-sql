@@ -17,6 +17,7 @@
         },
         link: {
             pre: function (scope, iElement, iAttrs, controller) {
+                scope.asqlForm.setDirty = function () { scope.asqlFormX.$setDirty(); };
                 scope.asqlForm.dismissAlert = function () { scope.asqlForm.alert = null };
                 scope.asqlForm.heading = function () { return $interpolate(iAttrs["heading"])(scope); };
                 scope.asqlForm.editing = function () { return scope.asqlForm.canEdit() && scope.asqlFormX.$dirty; };
@@ -65,9 +66,16 @@ app.directive("asqlControl", ["$filter", function ($filter) {
                 controller[1].$formatters.push(function (modelValue) { return new Date(modelValue); });
                 controller[1].$parsers.push(function (modelValue) { return $filter("date")(new Date(modelValue), "yyyy-MM-dd"); });
             };
+            if (iAttrs["asqlControl"]) {
+                switch (angular.lowercase(iAttrs["asqlControl"])) {
+                    case "percent":
+                        controller[1].$formatters.push(function (modelValue) { return parseFloat(modelValue) * 100; });
+                        controller[1].$parsers.push(function (modelValue) { return parseFloat(modelValue) / 100; });
+                        break;
+                };
+            };
             if (!controller[0].canEdit()) iElement.attr("disabled", true);
 
         }
     };
 }]);
-

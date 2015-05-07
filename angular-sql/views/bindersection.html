@@ -6,15 +6,58 @@
                 <input type="text" ng-model="Section.Title" required asql-control />
             </asql-label>
             <asql-label text="Class of Business">
-                <select ng-model="Section.ClassId" ng-options="Class.Id as Class.Description for Class in Classes" reequired asql-control>
+                <select ng-model="Section.ClassId" ng-options="Class.Id as Class.Description for Class in Classes" required asql-control>
                     <option value=""></option>
                 </select>
             </asql-label>
-            <asql-label text="Third-Party Adjuster">
-                <select ng-model="Section.AdjusterId" ng-options="Adjuster.AdjusterId as Adjuster.Adjuster for Adjuster in Adjusters" reequired asql-control>
+            <asql-label text="Third-Party Administrator">
+                <select ng-model="Section.AdministratorId" ng-options="Administrator.AdministratorId as Administrator.Administrator for Administrator in Administrators" required asql-control>
                     <option value=""></option>
                 </select>
             </asql-label>
         </tab>
+        <tab heading="Carriers">
+            <br />
+            <div class="list-group">
+                <a href class="list-group-item" ng-click="AddCarrier()">
+                    <span class="text-primary">
+                        <i class="fa fa-plus-circle"></i> New Carrier
+                    </span>
+                </a>
+            </div>
+            <div class="row" ng-repeat="Carrier in Section.Carriers">
+                <div class="col-sm-8">
+                    <asql-label text="{{CarrierLabel($index)}}">
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" title="Remove Carrier" ng-click="RemoveCarrier(Carrier)">
+                                    <i class="fa fa-remove"></i>
+                                </button>
+                            </span>
+                            <select ng-model="Carrier.CarrierId" ng-options="Carrier.CarrierId as Carrier.Carrier for Carrier in Carriers" required asql-control>
+                                <option value=""></option>
+                            </select>
+                        </div>
+                    </asql-label>
+                </div>
+                <div class="col-sm-4">
+                    <asql-label text="Split">
+                        <div class="input-group">
+                            <input type="number" min="0" max="100" ng-model="Carrier.Percentage" required asql-control="percent" />
+                            <span class="input-group-addon">%</span>
+                        </div>
+                    </asql-label>
+                </div>
+            </div>
+            <div class="row" ng-show="asqlForm.editing() && Total() != 1">
+                <div class="col-sm-8">
+                    <asql-label>
+                        <input type="hidden" ng-model="TotalCheck" required />
+                        <div class="help-block">Total split must equal 100%</div>
+                    </asql-label>
+                </div>
+            </div>
+        </tab>
     </tabset>
 </asql-form>
+

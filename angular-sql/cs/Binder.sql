@@ -4,9 +4,11 @@ GO
 SET NOCOUNT ON
 GO
 
-IF OBJECT_ID(N'apiBinderSectionAdjuster', N'P') IS NOT NULL DROP PROCEDURE [apiBinderSectionAdjuster]
+IF OBJECT_ID(N'apiBinderSectionCarrier', N'P') IS NOT NULL DROP PROCEDURE [apiBinderSectionCarrier]
+IF OBJECT_ID(N'apiBinderSectionAdministrator', N'P') IS NOT NULL DROP PROCEDURE [apiBinderSectionAdministrator]
 IF OBJECT_ID(N'apiBinderSection', N'P') IS NOT NULL DROP PROCEDURE [apiBinderSection]
 IF OBJECT_ID(N'apiBinderSections', N'P') IS NOT NULL DROP PROCEDURE [apiBinderSections]
+IF OBJECT_ID(N'BinderSectionCarrier', N'U') IS NOT NULL DROP TABLE [BinderSectionCarrier]
 IF OBJECT_ID(N'BinderSection', N'U') IS NOT NULL DROP TABLE [BinderSection]
 IF OBJECT_ID(N'apiClassOfBusiness', N'P') IS NOT NULL DROP PROCEDURE [apiClassOfBusiness]
 IF OBJECT_ID(N'ClassOfBusiness', N'U') IS NOT NULL DROP TABLE [ClassOfBusiness]
@@ -95,7 +97,7 @@ VALUES
  (N'Congo, the Democratic Republic of the', N'CD'),
  (N'Cook Islands', N'CK'),
  (N'Costa Rica', N'CR'),
- (N'Côte d''Ivoire', N'CI'),
+ (N'Cote d''Ivoire', N'CI'),
  (N'Croatia', N'HR'),
  (N'Cuba', N'CU'),
  (N'Curaçao', N'CW'),
@@ -221,7 +223,7 @@ VALUES
  (N'Portugal', N'PT'),
  (N'Puerto Rico', N'PR'),
  (N'Qatar', N'QA'),
- (N'Réunion', N'RE'),
+ (N'Reunion', N'RE'),
  (N'Romania', N'RO'),
  (N'Russian Federation', N'RU'),
  (N'Rwanda', N'RW'),
@@ -378,13 +380,14 @@ GO
 CREATE TABLE [Company] (
   [Id] INT NOT NULL IDENTITY (1, 1),
 		[Name] NVARCHAR(255) NOT NULL,
+		[DisplayName] AS [Name] + N' (' + [CountryId] + N')' PERSISTED,
 		[Address] NVARCHAR(255) NULL,
 		[Postcode] NVARCHAR(25) NULL,
 		[CountryId] NCHAR(2) NOT NULL,
 		[LBR] BIT NOT NULL CONSTRAINT [DF_Company_LBR] DEFAULT (0), -- Lloyd's Broker
 		[COV] BIT NOT NULL CONSTRAINT [DF_Company_COV] DEFAULT (0), -- Coverholder
 		[CAR] BIT NOT NULL CONSTRAINT [DF_Company_CAR] DEFAULT (0), -- Carrier
-		[TPA] BIT NOT NULL CONSTRAINT [DF_Company_TPA] DEFAULT (0), -- Third-Party Adjuster
+		[TPA] BIT NOT NULL CONSTRAINT [DF_Company_TPA] DEFAULT (0), -- Third-Party Administrator
 		[CreatedDTO] DATETIMEOFFSET NOT NULL CONSTRAINT [DF_Company_CreatedDTO] DEFAULT (GETUTCDATE()),
 		[CreatedById] INT NOT NULL,
 		[UpdatedDTO] DATETIMEOFFSET NOT NULL CONSTRAINT [DF_Company_UpdatedDTO] DEFAULT (GETUTCDATE()),
@@ -399,10 +402,409 @@ CREATE TABLE [Company] (
 	)
 GO
 
-INSERT INTO [Company] ([Name], [CountryId], [LBR], [COV], [CreatedById], [UpdatedById])
-VALUES
- (N'Whitespace Software Limited', N'GB', 1, 0, 1, 1),
-	(N'Datarise Limited', N'US', 0, 1, 2, 2)
+INSERT INTO [Company] ([Name], [CountryId], [LBR], [COV], [CAR], [TPA], [CreatedById], [UpdatedById])
+SELECT [Name], [CountryId], [LBR], [COV], [CAR], [TPA], 1, 1
+FROM (VALUES
+   ('A Plus Lawn Care'),
+   ('A+ Investments'),
+   ('Aaronson Furniture'),
+   ('Accord Investments'),
+   ('Acuserv'),
+   ('Adapt'),
+   ('Alexander''s'),
+   ('Allied Radio'),
+   ('Anderson-Little'),
+   ('Angel''s'),
+   ('Asian Answers'),
+   ('Asian Junction'),
+   ('Asian Plan'),
+   ('Atlas Architectural Designs'),
+   ('Atlas Realty'),
+   ('Audio Visions'),
+   ('Avant Garde Appraisal Group'),
+   ('Avant Garde Interior Designs'),
+   ('Balanced Fortune'),
+   ('Baltimore Markets'),
+   ('Bay Furniture'),
+   ('Best Products'),
+   ('Big A Auto Parts'),
+   ('Big D Supermarkets'),
+   ('Big Star Markets'),
+   ('Blockbuster Music'),
+   ('Body Toning'),
+   ('Bold Ideas'),
+   ('Bonanza Produce Stores'),
+   ('Briazz'),
+   ('Brilliant Home Designs'),
+   ('Britling Cafeterias'),
+   ('Brooks Fashions'),
+   ('Buehler Foods'),
+   ('Buena Vista Garden Maintenance'),
+   ('Builders Emporium'),
+   ('Burger Chef'),
+   ('Carl Durfees'),
+   ('Carter''s Foods'),
+   ('Castro Convertibles'),
+   ('Central Hardware'),
+   ('Channel Home Centers'),
+   ('Chargepal'),
+   ('Cherry & Webb'),
+   ('Chess King'),
+   ('Chi-Chi''s'),
+   ('Children''s Palace'),
+   ('Circuit Design'),
+   ('Club Wholesale'),
+   ('Coast to Coast Hardware'),
+   ('Coconut''s'),
+   ('Colonial Stores'),
+   ('Compact Disc Center'),
+   ('CompuAdd'),
+   ('Consumers and Consumers Express'),
+   ('Cougar Investment'),
+   ('Country Club Markets'),
+   ('Crafts Canada'),
+   ('Crazy Eddie'),
+   ('Crown Books'),
+   ('Cut Above'),
+   ('Dave Cooks'),
+   ('De Pinna'),
+   ('Delchamps'),
+   ('Destiny Planners'),
+   ('Destiny Realty'),
+   ('Dick Fischers'),
+   ('Disc Jockey'),
+   ('Dream Home Improvements'),
+   ('Druther''s'),
+   ('Earl Abel''s'),
+   ('Earthworks Garden Kare'),
+   ('Earthworks Yard Maintenance'),
+   ('Eden Lawn Service'),
+   ('Edge Yard Service'),
+   ('Eisner Food Stores'),
+   ('Electric Avenue'),
+   ('Electronic Geek'),
+   ('Electronics Source'),
+   ('Ellman''s Catalog Showrooms'),
+   ('Elm Farm'),
+   ('Endicott Johnson'),
+   ('Endicott Shoes'),
+   ('Envirotecture Design Service'),
+   ('Erb Lumber'),
+   ('Erol''s'),
+   ('Exact Solutions'),
+   ('EXPO Design Center'),
+   ('Express Merchant Service'),
+   ('E-zhe Source'),
+   ('Farmer Jack'),
+   ('Fayva'),
+   ('Fedco'),
+   ('First Choice Yard Help'),
+   ('First Rate Choice'),
+   ('Flipside Records'),
+   ('FlowerTime'),
+   ('Food Fair'),
+   ('Food Mart'),
+   ('Foreman & Clark'),
+   ('Forest City'),
+   ('Formula Gray'),
+   ('Foxmoor'),
+   ('Franklin Simon'),
+   ('Frank''s Nursery & Crafts'),
+   ('Fresh Start'),
+   ('Future Bright'),
+   ('Future Plan'),
+   ('G.I. Joe''s'),
+   ('Galaxy Man'),
+   ('Gallenkamp'),
+   ('Galyan''s'),
+   ('Gamma Grays'),
+   ('Gantos'),
+   ('Garden Guru'),
+   ('Garden Master'),
+   ('Gas Depot'),
+   ('Geri''s Hamburgers'),
+   ('Giant'),
+   ('Gino''s Hamburgers'),
+   ('Gold Leaf Garden Management'),
+   ('Gold Touch'),
+   ('Golden''s Distributors'),
+   ('Golf Augusta Pro Shops'),
+   ('Good Guys'),
+   ('Grade A Investment'),
+   ('Grand Union'),
+   ('Great American Music'),
+   ('Great Clothes'),
+   ('Grossman''s'),
+   ('Handy Andy'),
+   ('Hanover Shoe'),
+   ('Hastings'),
+   ('Heilig-Meyers'),
+   ('Helios Air'),
+   ('Helping Hand'),
+   ('Henry''s'),
+   ('Herman''s World of Sporting Goods'),
+   ('Highland Appliance'),
+   ('Hills Supermarkets'),
+   ('Holly Tree Inn'),
+   ('Home Centers'),
+   ('Home Quarters Warehouse'),
+   ('HomeBase'),
+   ('Honest Air Group'),
+   ('House Of Denmark'),
+   ('House Works'),
+   ('Hoyden'),
+   ('Hudson''s MensWear'),
+   ('Hugh M. Woods'),
+   ('Hughes & Hatcher'),
+   ('Hughes Markets'),
+   ('Ideal Garden Management'),
+   ('Incredible Universe'),
+   ('Integra Design'),
+   ('Integra Wealth'),
+   ('Intelacard'),
+   ('Intelli Wealth Group'),
+   ('Irving''s Sporting Goods'),
+   ('J. K. Gill Company'),
+   ('Jack Lang'),
+   ('Janeville'),
+   ('Jitney Jungle'),
+   ('Judy''s'),
+   ('Just For Feet'),
+   ('K&G Distributors'),
+   ('Karl''s Shoes'),
+   ('Keeney''s'),
+   ('Kelly and Cohen'),
+   ('Kelsey''s Neighbourhood Bar & Grill'),
+   ('Kids Mart'),
+   ('Kinney Shoes'),
+   ('Knockout Kickboxing'),
+   ('Kohl''s Food Stores'),
+   ('Kragen Auto Parts'),
+   ('Krauses Sofa Factory'),
+   ('L'' Fish'),
+   ('Landskip Yard Care'),
+   ('Larry''s Markets'),
+   ('Laughner''s Cafeteria'),
+   ('Laura Ashley Mother & Child'),
+   ('Laura Ashley'),
+   ('Lechters Housewares'),
+   ('Leonard Krower & Sons'),
+   ('Liberal'),
+   ('Liberty Wealth Planner'),
+   ('Licorice Pizza'),
+   ('Life Map Planners'),
+   ('Life Map'),
+   ('Listenin'' Booth'),
+   ('Little Folk Shops'),
+   ('Littler''s'),
+   ('Lone Wolf Wealth Planning'),
+   ('Luria''s'),
+   ('MacMarr Stores'),
+   ('Macroserve'),
+   ('Madcats Music & Books'),
+   ('Mages'),
+   ('Magik Gray'),
+   ('Magik Grey'),
+   ('Magna Architectural Design'),
+   ('Magna Solution'),
+   ('Magna Wealth'),
+   ('Manu Connection'),
+   ('Marianne'),
+   ('Market Basket'),
+   ('Matrix Design'),
+   ('Matrix Interior Design'),
+   ('Maurice The Pants Man'),
+   ('Maxiserve '),
+   ('Maxi-Tech'),
+   ('Megatronic'),
+   ('Merry-Go-Round'),
+   ('Metro'),
+   ('Mighty Casey''s'),
+   ('Mikro Designs'),
+   ('Mikrotechnic'),
+   ('Mission Realty'),
+   ('Mission You'),
+   ('Modern Architecture Design'),
+   ('Modern Realty'),
+   ('Monit'),
+   ('Monk Home Funding Services'),
+   ('Monk Home Improvements'),
+   ('Monk Home Loans'),
+   ('Monk Real Estate Service'),
+   ('Monsource'),
+   ('Morrie Mages'),
+   ('Movie Gallery'),
+   ('Multicerv'),
+   ('Muscle Factory'),
+   ('Music Den'),
+   ('Musicland'),
+   ('MVP Sports'),
+   ('Nan Duskin'),
+   ('National Tea'),
+   ('Nedick''s'),
+   ('Netcore'),
+   ('Netobill'),
+   ('Newhair'),
+   ('Newmark & Lewis'),
+   ('Northern Reflections'),
+   ('Northern Star'),
+   ('Nutri G'),
+   ('O.K. Fairbanks'),
+   ('Office Warehouse'),
+   ('Official All Star Caf�'),
+   ('Olympic Sports'),
+   ('Omni Architectural Designs'),
+   ('Omni Superstore'),
+   ('Omni Tech Solutions'),
+   ('On Cue'),
+   ('One-Up Realtors'),
+   ('One-Up Realty'),
+   ('Opticomp'),
+   ('Oranges Records & Tapes'),
+   ('Orion'),
+   ('Pace Membership Warehouse'),
+   ('Pak and Save'),
+   ('Pantry Pride'),
+   ('Parts America'),
+   ('Patterson-Fletcher'),
+   ('Paul''s Food Mart'),
+   ('Paul''s Record Hut'),
+   ('Pay ''N Pak'),
+   ('Payless Cashways'),
+   ('Pay''N Takeit'),
+   ('Pender''s Food Stores'),
+   ('Piccolo Mondo'),
+   ('Piece Goods Fabric'),
+   ('Plan Future'),
+   ('Plan Smart Partner'),
+   ('Plan Smart'),
+   ('Planet Pizza'),
+   ('Planetbiz'),
+   ('Platinum Interior Design'),
+   ('Play Town'),
+   ('Pleasures and Pasttimes'),
+   ('Pointers'),
+   ('Poore Simon''s'),
+   ('Practi-Plan Mapping'),
+   ('Practi-Plan'),
+   ('Prahject Planner'),
+   ('Price Club'),
+   ('PriceRite Warehouse Club'),
+   ('Pro Property Maintenance'),
+   ('Pro Star Garden Management'),
+   ('Pro-Care Garden Maintenance'),
+   ('Protean'),
+   ('Quality Event Planner'),
+   ('Quality Merchant Services'),
+   ('Quest Technology Service'),
+   ('Rack N Sack'),
+   ('Rainbow Life'),
+   ('Red Baron Electronics'),
+   ('Red Food'),
+   ('Rhodes Furniture'),
+   ('Rickel'),
+   ('Roadhouse Grill'),
+   ('Roberd''s'),
+   ('Robinson Furniture'),
+   ('Romp'),
+   ('Rossi Auto Parts'),
+   ('Rustler Steak House'),
+   ('S&W Cafeteria'),
+   ('Sam Goody'),
+   ('Sammy''s Record Shack'),
+   ('Sandy''s'),
+   ('Sanitary Grocery Stores'),
+   ('Schaak Electronics'),
+   ('Scott Ties'),
+   ('Scotty''s Builders Supply'),
+   ('Seamans Furniture'),
+   ('Sears Homelife'),
+   ('Second Time Around'),
+   ('Sew-Fro Fabrics'),
+   ('Shoe Kicks'),
+   ('Shoe Pavilion'),
+   ('Shoe Town'),
+   ('Signa Air'),
+   ('Smitty''s Marketplace'),
+   ('Soft Warehouse'),
+   ('Solution Bridge'),
+   ('Soul Sounds Unlimited'),
+   ('Sound Advice'),
+   ('Sound Warehouse'),
+   ('Sounds of Soul Records & Tapes'),
+   ('Source Club'),
+   ('Sportmart'),
+   ('Star Merchant Services'),
+   ('Starship Tapes & Records'),
+   ('Steinberg''s'),
+   ('Steve''s Ice Cream'),
+   ('Stop and Shop'),
+   ('Stop N Shop'),
+   ('Stratabiz'),
+   ('Strategic Profit'),
+   ('Strategy Consulting'),
+   ('Strategy Planner'),
+   ('Strength Gurus'),
+   ('Success Is Yours'),
+   ('Sun Television and Appliances'),
+   ('Sunflower Market'),
+   ('Sunny Real Estate Investments'),
+   ('Super Shops'),
+   ('Susie''s Casuals'),
+   ('System Star'),
+   ('Tape World'),
+   ('Team Electronics'),
+   ('Tee Town'),
+   ('Terra Nova Garden Services'),
+   ('Thalhimers'),
+   ('The Goose and Duck'),
+   ('The Great Train Stores'),
+   ('The Independent Planners'),
+   ('The Lawn Guru'),
+   ('The Network Chef'),
+   ('The Pink Pig Tavern'),
+   ('The Polka Dot Bear Tavern'),
+   ('The Wall'),
+   ('The White Swan'),
+   ('Thom McAn Store'),
+   ('Thriftway Food Mart'),
+   ('Total Sources'),
+   ('Total Yard Maintenance'),
+   ('Tower Records'),
+   ('Twin Food Stores'),
+   ('Ukrop''s Super Market'),
+   ('Unity Stationers'),
+   ('Universo Realtors'),
+   ('Value Giant'),
+   ('Vibrant Man'),
+   ('Virgin Megastores'),
+   ('VitaGrey'),
+   ('Vitamax Health Food Center'),
+   ('Waccamaw''s Homeplace'),
+   ('Wag''s'),
+   ('Walt''s IGA'),
+   ('Warner Brothers Studio Store'),
+   ('Warshal''s'),
+   ('Waves Music'),
+   ('Wealth Zone Group'),
+   ('Western Auto'),
+   ('Wetson''s'),
+   ('Whitlocks Auto Supply'),
+   ('Widdmann'),
+   ('William Wanamaker & Sons'),
+   ('Wise Solutions'),
+   ('Woolf Brothers'),
+   ('World of Fun'),
+   ('Yardbirds Home Center'),
+   ('York Steak House'),
+   ('You Are Successful'),
+   ('Zephyr Investments')
+  ) cmp ([Name])
+	CROSS APPLY (SELECT TOP 1 [Id] FROM [Country] WHERE cmp.[Name] IS NOT NULL ORDER BY NEWID()) co ([CountryId])
+	CROSS APPLY (SELECT TOP 1 [Bit] FROM (VALUES (0), (1)) b ([Bit]) WHERE cmp.[Name] IS NOT NULL ORDER BY NEWID()) lbr ([LBR])
+	CROSS APPLY (SELECT TOP 1 [Bit] FROM (VALUES (0), (1)) b ([Bit]) WHERE cmp.[Name] IS NOT NULL ORDER BY NEWID()) cov ([COV])
+	CROSS APPLY (SELECT TOP 1 [Bit] FROM (VALUES (0), (1)) b ([Bit]) WHERE cmp.[Name] IS NOT NULL ORDER BY NEWID()) car ([CAR])
+	CROSS APPLY (SELECT TOP 1 [Bit] FROM (VALUES (0), (1)) b ([Bit]) WHERE cmp.[Name] IS NOT NULL ORDER BY NEWID()) tpa ([TPA])
 GO
 
 CREATE TABLE [CompanyRole] (
@@ -420,7 +822,7 @@ VALUES
  (N'LBR', N'Lloyd''s Broker', 1),
 	(N'COV', N'Coverholder', 2),
 	(N'CAR', N'Carrier', 3),
-	(N'TPA', N'Third-Party Adjuster', 4)
+	(N'TPA', N'Third-Party Administrator', 4)
 GO
 
 CREATE PROCEDURE [apiCompanies](@UserId INT, @RoleId NCHAR(3) = NULL)
@@ -577,9 +979,24 @@ CREATE TABLE [Binder] (
 GO
 
 INSERT INTO [Binder] ([UMR], [Reference], [BrokerId], [CoverholderId], [InceptionDate], [ExpiryDate], [RisksTerritoryId], [DomiciledTerritoryId], [LimitsTerritoryId], [CreatedById], [UpdatedById])
-VALUES
- (N'UMR0001', N'REF00001', 1, 2, N'2012-01-01', N'2012-12-31', 0, 2, 4, 1, 1),
-	(N'UMR0002', N'REF00002', 2, 1, N'2013-07-01', N'2014-06-30', 0, 1, 3, 1, 1)
+SELECT
+ [UMR] = N'UMR' + RIGHT(N'000000' + CONVERT(NVARCHAR(10), v.[number]), 6),
+	[Reference] = N'REF' + RIGHT(N'000000' + CONVERT(NVARCHAR(10), v.[number] * (2 + v.[number])), 6),
+	[BrokerId] = lbr.[Id],
+	[CoverholderId] = cov.[Id],
+	[InceptionDate] = dte.[InceptionDate],
+	[ExpiryDate] = DATEADD(day, -1, DATEADD(year, 1, dte.[InceptionDate])),
+	[RisksTerritoryId] = (SELECT TOP 1 [Id] FROM [Territory] WHERE v.[number] IS NOT NULL ORDER BY NEWID()),
+	[DomiciledTerritoryId] = (SELECT TOP 1 [TerritoryId] FROM [vwTerritoryCountries] tc WHERE cov.[CountryId] = tc.[CountryId] ORDER BY NEWID()),
+	[LmitsTerritoryId] = (SELECT TOP 1 [Id] FROM [Territory] WHERE v.[number] IS NOT NULL ORDER BY NEWID()),
+	[CreatedById] = 1,
+	[UpdatedById] = 1
+FROM [master]..[spt_values] v
+ CROSS APPLY (SELECT TOP 1 * FROM [Company] WHERE [LBR] = 1 AND v.[number] IS NOT NULL ORDER BY NEWID()) lbr
+	CROSS APPLY (SELECT TOP 1 * FROM [Company] WHERE [COV] = 1 AND v.[number] IS NOT NULL ORDER BY NEWID()) cov
+	CROSS APPLY (SELECT DATEADD(month, v.[number] / 2, N'1995-01-01')) dte ([InceptionDate])
+WHERE v.[type] = N'P'
+ AND v.[number] BETWEEN 1 AND 500
 GO
 
 CREATE PROCEDURE [apiBinders](@UserId INT)
@@ -704,12 +1121,12 @@ BEGIN
 	SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED
  SELECT
 	 [CoverholderId] = c.[Id],
-		[Coverholder] = c.[Name] + N' (' + c.[CountryId] + N')'
+		[Coverholder] = c.[DisplayName]
 	FROM [Company] c
 	 LEFT JOIN [Binder] b ON @BinderId = b.[Id] AND c.[Id] = b.[CoverholderId]
 	WHERE c.[COV] & c.[Active] = 1
 	 OR b.[Id] IS NOT NULL
-	ORDER BY c.[Name], c.[CountryId]
+	ORDER BY c.[DisplayName]
 	RETURN
 END
 GO
@@ -721,13 +1138,12 @@ BEGIN
 	SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED
  SELECT
 	 [BrokerId] = c.[Id],
-		[Broker] = c.[Name] + N' (' + c.[CountryId] + N')'
+		[Broker] = c.[DisplayName]
 	FROM [Company] c
 	 LEFT JOIN [Binder] b ON @BinderId = b.[Id] AND c.[Id] = b.[BrokerId]
 	WHERE c.[LBR] & c.[Active] = 1
 	 OR b.[Id] IS NOT NULL
-	ORDER BY c.[Name], c.[CountryId]
-	RETURN
+	ORDER BY c.[DisplayName]
 END
 GO
 
@@ -780,7 +1196,7 @@ CREATE TABLE [BinderSection] (
   [BinderId] INT NOT NULL,
 		[ClassId] NVARCHAR(5) NOT NULL,
 		[Title] NVARCHAR(255) NOT NULL,
-		[AdjusterId] INT NOT NULL,
+		[AdministratorId] INT NOT NULL,
 		[CreatedDTO] DATETIMEOFFSET NOT NULL CONSTRAINT [DF_BinderSection_CreatedDTO] DEFAULT (GETUTCDATE()),
 		[CreatedById] INT NOT NULL,
 		[UpdatedDTO] DATETIMEOFFSET NOT NULL CONSTRAINT [DF_BinderSection_UpdatedDTO] DEFAULT (GETUTCDATE()),
@@ -789,16 +1205,36 @@ CREATE TABLE [BinderSection] (
 		CONSTRAINT [UQ_BinderSection_Title] UNIQUE CLUSTERED ([BinderId], [Title]),
 		CONSTRAINT [FK_BinderSection_Binder] FOREIGN KEY ([BinderId]) REFERENCES [Binder] ([Id]) ON DELETE CASCADE,
 		CONSTRAINT [FK_BinderSection_ClassOfBusiness] FOREIGN KEY ([ClassId]) REFERENCES [ClassOfBusiness] ([Id]) ON UPDATE CASCADE,
+		CONSTRAINT [FK_BinderSection_Company_AdministratorId] FOREIGN KEY ([AdministratorId]) REFERENCES [Company] ([Id]),
 		CONSTRAINT [FK_BinderSection_User_CreatedById] FOREIGN KEY ([CreatedById]) REFERENCES [User] ([Id]),
 		CONSTRAINT [FK_BinderSection_User_UpdatedById] FOREIGN KEY ([UpdatedById]) REFERENCES [User] ([Id]),
 		CONSTRAINT [CK_BinderSection_UpdatedDTO] CHECK ([UpdatedDTO] >= [CreatedDTO])
 	)
 GO
 
-INSERT INTO [BinderSection] ([BinderId], [ClassId], [Title], [AdjusterId], [CreatedById], [UpdatedById])
+INSERT INTO [BinderSection] ([BinderId], [ClassId], [Title], [AdministratorId], [CreatedById], [UpdatedById])
 VALUES
- (1, N'PROP', N'Property', 1, 1, 1),
-	(1, N'BI', N'Business Interruption', 1, 1, 1)
+ (1, N'PROP', N'Buildings', 1, 1, 1),
+	(1, N'BI', N'Business Cover', 1, 1, 1)
+GO
+
+CREATE TABLE [BinderSectionCarrier] (
+  [SectionId] INT NOT NULL,
+		[CarrierId] INT NOT NULL,
+		[Percentage] DECIMAL(5, 4) NOT NULL,
+		CONSTRAINT [PK_BinderSectionCarrier] PRIMARY KEY CLUSTERED ([SectionId], [CarrierId]),
+		CONSTRAINT [FK_BinderSectionCarrier_BinderSection] FOREIGN KEY ([SectionId]) REFERENCES [BinderSection] ([Id]) ON DELETE CASCADE,
+		CONSTRAINT [FK_BinderSectionCarrier_Company_CarrierId] FOREIGN KEY ([CarrierId]) REFERENCES [Company] ([Id]),
+		CONSTRAINT [CK_BinderSectionCarrier_Percentage] CHECK ([Percentage] BETWEEN 0 AND 1)
+	)
+GO
+
+INSERT INTO [BinderSectionCarrier] ([SectionId], [CarrierId], [Percentage])
+VALUES
+ (1, 1, 0.6),
+	(1, 2, 0.4),
+ (2, 2, 0.75),
+	(2, 1, 0.25)
 GO
 
 CREATE PROCEDURE [apiBinderSections] (@UserId INT, @BinderId INT)
@@ -824,34 +1260,63 @@ AS
 BEGIN
  SET NOCOUNT ON
 	SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED
+	;WITH XMLNAMESPACES (N'http://james.newtonking.com/projects/json' AS [json])
 	SELECT
 	 [SectionId] = bs.[Id],
 		[BinderId] = bs.[BinderId],
 		[ClassId] = bs.[ClassId],
 		[Title] = bs.[Title],
-		[AdjusterId] = bs.[AdjusterId]
+		[AdministratorId] = bs.[AdministratorId],
+		(
+		  SELECT
+				 [@json:Array] = N'true',
+					[CarrierId] = bsc.[CarrierId],
+					[Percentage] = bsc.[Percentage]
+				FROM [BinderSectionCarrier] bsc
+				WHERE bs.[Id] = bsc.[SectionId]
+				FOR XML PATH (N'Carriers'), TYPE
+		 )
 	FROM [BinderSection] bs
 	WHERE bs.[Id] = @SectionId
+	FOR XML PATH (N'Section')
 	RETURN
 END
 GO
 
-CREATE PROCEDURE [apiBinderSectionAdjuster](@UserId INT, @SectionId INT)
+CREATE PROCEDURE [apiBinderSectionAdministrator](@UserId INT, @SectionId INT = NULL)
 AS
 BEGIN
  SET NOCOUNT ON
 	SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED
  SELECT
-	 [AdjusterId] = c.[Id],
-		[Adjuster] = c.[Name] + N' (' + c.[CountryId] + N')'
+	 [AdministratorId] = CONVERT(NVARCHAR(10), c.[Id]),
+		[Administrator] = c.[DisplayName]
 	FROM [Company] c
-	 LEFT JOIN [BinderSection] bs ON @SectionId = bs.[Id] AND c.[Id] = bs.[AdjusterId]
+	 LEFT JOIN [BinderSection] bs ON @SectionId = bs.[Id] AND c.[Id] = bs.[AdministratorId]
 	WHERE c.[TPA] & c.[Active] = 1
 	 OR bs.[Id] IS NOT NULL
-	ORDER BY c.[Name], c.[CountryId]
+	ORDER BY c.[DisplayName]
 	RETURN
 END
 GO
 
-EXEC [apiBinderSection] 1, 1
-EXEC [apiBinderSectionAdjuster] 1, 1
+CREATE PROCEDURE [apiBinderSectionCarrier](@UserId INT, @BinderId INT = NULL)
+AS
+BEGIN
+ SET NOCOUNT ON
+	SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED
+	SELECT
+		[CarrierId] = CONVERT(NVARCHAR(10), [Id]),
+		[Carrier] = [DisplayName] 
+	FROM [Company]
+	WHERE [CAR] = 1
+		OR [Id] IN (
+				SELECT DISTINCT bsc.[CarrierId]
+				FROM [BinderSection] bs
+					JOIN [BinderSectionCarrier] bsc ON bs.[Id] = bsc.[SectionId]
+				WHERE bs.[BinderId] = @BinderId
+			)
+	ORDER BY [DisplayName]
+ RETURN
+END
+GO

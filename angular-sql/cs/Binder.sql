@@ -4,6 +4,7 @@ GO
 SET NOCOUNT ON
 GO
 
+IF OBJECT_ID(N'apiBinderSectionSave', N'P') IS NOT NULL DROP PROCEDURE [apiBinderSectionSave]
 IF OBJECT_ID(N'apiBinderSectionCarrier', N'P') IS NOT NULL DROP PROCEDURE [apiBinderSectionCarrier]
 IF OBJECT_ID(N'apiBinderSectionAdministrator', N'P') IS NOT NULL DROP PROCEDURE [apiBinderSectionAdministrator]
 IF OBJECT_ID(N'apiBinderSection', N'P') IS NOT NULL DROP PROCEDURE [apiBinderSection]
@@ -1236,20 +1237,24 @@ GO
 CREATE TABLE [BinderSectionCarrier] (
   [SectionId] INT NOT NULL,
 		[CarrierId] INT NOT NULL,
+		[Index] TINYINT NOT NULL,
 		[Percentage] DECIMAL(5, 4) NOT NULL,
-		CONSTRAINT [PK_BinderSectionCarrier] PRIMARY KEY CLUSTERED ([SectionId], [CarrierId]),
+		CONSTRAINT [PK_BinderSectionCarrier] PRIMARY KEY NONCLUSTERED ([SectionId], [CarrierId]),
+		CONSTRAINT [UQ_BinderSectionCarrier_Index] UNIQUE CLUSTERED ([SectionId], [Index]),
 		CONSTRAINT [FK_BinderSectionCarrier_BinderSection] FOREIGN KEY ([SectionId]) REFERENCES [BinderSection] ([Id]) ON DELETE CASCADE,
 		CONSTRAINT [FK_BinderSectionCarrier_Company_CarrierId] FOREIGN KEY ([CarrierId]) REFERENCES [Company] ([Id]),
 		CONSTRAINT [CK_BinderSectionCarrier_Percentage] CHECK ([Percentage] BETWEEN 0 AND 1)
 	)
 GO
 
-INSERT INTO [BinderSectionCarrier] ([SectionId], [CarrierId], [Percentage])
-VALUES
- (1, 1, 0.6),
-	(1, 2, 0.4),
- (2, 2, 0.75),
-	(2, 1, 0.25)
+-- ##TESTDATA
+INSERT INTO [BinderSectionCarrier] ([SectionId], [CarrierId], [Index], [Percentage])
+SELECT
+ [SectionId] = [Id],
+	[CarrierId] = (SELECT TOP 1 [Id] FROM [Company] WHERE [CAR] = 1 AND bs.[Id] IS NOT NULL ORDER BY NEWID()),
+	[Index] = 1,
+	[Percentage] = 1
+FROM [BinderSection] bs
 GO
 
 CREATE PROCEDURE [apiBinderSections] (@UserId INT, @BinderId INT)
@@ -1260,10 +1265,20 @@ BEGIN
 	SELECT
 	 [SectionId] = bs.[Id],
 		[Title] = bs.[Title],
-		[Class] = cob.[Description]
+		[Class] = cob.[Description],
+		[Lead] = lc.[Lead],
+		[TPA] = tpa.[DisplayName]
 	FROM [Binder] b
 	 JOIN [BinderSection] bs ON b.[Id] = bs.[BinderId]
 		JOIN [ClassOfBusiness] cob ON bs.[ClassId] = cob.[Id]
+		OUTER APPLY (
+		  SELECT TOP 1 [Lead] = cmp.[DisplayName]
+				FROM [BinderSectionCarrier] bsc
+				 JOIN [Company] cmp ON bsc.[CarrierId] = cmp.[Id]
+				WHERE bs.[Id] = bsc.[SectionId]
+				ORDER BY bsc.[Index]
+		 ) lc
+		LEFT JOIN [Company] tpa ON bs.[AdministratorId] = tpa.[Id]
 	WHERE b.[Id] = @BinderId
 	ORDER BY bs.[Title]
 	RETURN
@@ -1289,6 +1304,7 @@ BEGIN
 					[Percentage] = bsc.[Percentage]
 				FROM [BinderSectionCarrier] bsc
 				WHERE bs.[Id] = bsc.[SectionId]
+				ORDER BY bsc.[Index]
 				FOR XML PATH (N'Carriers'), TYPE
 		 )
 	FROM [BinderSection] bs
@@ -1333,5 +1349,58 @@ BEGIN
 			)
 	ORDER BY [DisplayName]
  RETURN
+END
+GO
+
+
+CREATE PROCEDURE [apiBinderSectionSave](
+  @SectionId INT = NULL,
+		@BinderId INT = NULL,
+		@ClassId NVARCHAR(5) = NULL,
+		@Title NVARCHAR(255) = NULL,
+  @AdministratorId INT = NULL,
+		@Carriers XML = NULL,
+  @UserId INT
+ )
+AS
+BEGIN
+ SET NOCOUNT ON
+
+	IF @SectionId IS NULL BEGIN
+	 INSERT INTO [BinderSection] ([BinderId], [ClassId], [Title], [AdministratorId], [CreatedDTO], [CreatedById], [UpdatedDTO], [UpdatedById])
+		VALUES (@BinderId, @ClassId, @Title, @AdministratorId, GETUTCDATE(), @UserId, GETUTCDATE(), @UserId)
+		SET @SectionId = SCOPE_IDENTITY()
+	END ELSE BEGIN
+	 UPDATE [BinderSection]
+		SET
+		 [BinderId] = ISNULL(@BinderId, [BinderId]),
+			[ClassId] = ISNULL(@ClassId, [ClassId]),
+			[Title] = ISNULL(@Title, [Title]),
+			[AdministratorId] = ISNULL(@AdministratorId, [AdministratorId]),
+			[UpdatedDTO] = GETUTCDATE(),
+			[UpdatedById] = @UserId
+		WHERE [Id] = @SectionId
+	END
+
+ ;WITH [Data] AS (
+	  SELECT
+			 [SectionId] = @SectionId,
+			 [CarrierId] = c.value(N'CarrierId[1]', N'INT'),
+				[Index] = ROW_NUMBER() OVER (ORDER BY c.value(N'Index[1]', N'TINYINT')),
+				[Percentage] = c.value(N'Percentage[1]', N'DECIMAL(5, 4)')
+			FROM @Carriers.nodes(N'/Object[1]/Data') car (c)
+	 )
+	MERGE
+	INTO [BinderSectionCarrier] AS t
+	USING [Data] AS s
+	ON t.[SectionId] = s.[SectionId] AND t.[CarrierId] = s.[CarrierId]
+	WHEN MATCHED THEN UPDATE SET [Percentage] = s.[Percentage], [Index] = s.[Index]
+	WHEN NOT MATCHED BY TARGET THEN
+	 INSERT ([SectionId], [CarrierId], [Index], [Percentage])
+		VALUES ([SectionId], [CarrierId], [Index], [Percentage])
+	WHEN NOT MATCHED BY SOURCE THEN DELETE;
+
+	EXEC [apiBinderSection] @UserId, @SectionId
+	RETURN
 END
 GO

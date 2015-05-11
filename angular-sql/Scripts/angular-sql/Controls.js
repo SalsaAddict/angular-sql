@@ -26,7 +26,10 @@
                 scope.asqlForm.undo = function () { scope.asqlFormX.$setPristine(); $route.reload(); };
                 scope.asqlForm.save = function () {
                     scope.Save.Execute(scope)
-                        .success(function (data) { scope.Success("Your changes were saved successfully."); scope.asqlFormX.$setPristine(); })
+                        .success(function (data) {
+                            scope.Success("Your changes were saved successfully.");
+                            scope.asqlFormX.$setPristine();
+                        })
                         .error(function (response, status) { scope.Error(response); });
                 };
             }

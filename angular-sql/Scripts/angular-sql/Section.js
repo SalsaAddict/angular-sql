@@ -1,8 +1,21 @@
-﻿app.controller("SectionController", ["$scope", "Procedure", function ($scope, Procedure) {
+﻿app.controller("SectionController", ["$scope", "$routeParams", "$route", "Procedure", function ($scope, $routeParams, $route, Procedure) {
+
+    var self = this;
+
+    self.ReIndexCarriers = function () {
+        var Index = 0;
+        angular.forEach($scope.Section.Carriers, function (Item) {
+            Item.Index = Index;
+            Index++;
+        });
+    };
+
+    $scope.BinderId = $routeParams.BinderId;
 
     var apiSection = new Procedure({
         Name: "apiBinderSection", UserId: true, Type: "object", Root: "Section", ngModel: "Section",
-        Parameters: [{ Name: "SectionId", Type: "route", Required: true }]
+        Parameters: [{ Name: "SectionId", Type: "route", Required: true }],
+        Success: function () { self.ReIndexCarriers(); }
     });
     apiSection.Execute($scope);
 
@@ -32,12 +45,14 @@
     $scope.RemoveCarrier = function (Item) {
         var Index = $scope.Section.Carriers.indexOf(Item);
         $scope.Section.Carriers.splice(Index, 1);
+        self.ReIndexCarriers();
         $scope.asqlForm.setDirty();
     };
 
     $scope.AddCarrier = function () {
         if (!angular.isDefined($scope.Section.Carriers)) $scope.Section.Carriers = [];
-        $scope.Section.Carriers.push({ CarrierId: null, Percentage: (1 - $scope.Total()) });
+        $scope.Section.Carriers.push({ CarrierId: null, Percentage: 0 });
+        self.ReIndexCarriers();
         $scope.asqlForm.setDirty();
     };
 
@@ -48,6 +63,19 @@
         return Total;
     };
 
-    $scope.Save = {};
+    $scope.Save = new Procedure({
+        Name: "apiBinderSectionSave", UserId: true, Type: "object", Root: "Section", ngModel: "Section",
+        Parameters: [
+            { Name: "SectionId", Type: "route" },
+            { Name: "BinderId", Type: "scope", Required: true },
+            { Name: "ClassId", Type: "scope", Value: "Section.ClassId" },
+            { Name: "Title", Type: "scope", Value: "Section.Title" },
+            { Name: "AdministratorId", Type: "scope", Value: "Section.AdministratorId" },
+            { Name: "Carriers", Type: "scope", Value: "Section.Carriers" }
+        ],
+        Success: function (Data) {
+            if (!$routeParams.SectionId) $route.updateParams({ BinderId: Data.BinderId, SectionId: Data.SectionId });
+        }
+    });
 
 }]);

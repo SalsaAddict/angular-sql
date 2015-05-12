@@ -1,4 +1,4 @@
-﻿app.controller("BindersController", ["$scope", "$location", "$localStorage", "Procedure", function ($scope, $location, $localStorage, Procedure) {
+﻿app.controller("BindersController", ["$scope", "$location", "$localStorage", "$filter", "Procedure", function ($scope, $location, $localStorage, $filter, Procedure) {
 
     $scope.$storage = $localStorage.$default({ BinderSearch: { Advanced: false, ClassId: null } });
 
@@ -28,6 +28,51 @@
 
     $scope.New = function () { $location.path("/binder"); };
     $scope.View = function (BinderId) { $location.path("/binder/" + BinderId); };
+
+    $scope.PDF = function (event, BinderId) {
+        var apiBinderPDF = new Procedure({
+            Name: "apiBinderPDF", UserId: true, Type: "object", Root: "Binder",
+            Parameters: [{ Name: "BinderId", Type: "value", Value: BinderId }],
+            Success: function (Data) {
+                var doc = {
+                    content: [
+                        { style: "heading", text: "Binder Details\n\n" },
+                        {
+                            table: {
+                                widths: [150, "*"],
+                                body: [
+                                    ["Agreement Number", Data.Reference],
+                                    ["Unique Market Reference", Data.UMR],
+                                    ["Coverholder", Data.Coverholder],
+                                    ["Lloyd's Broker", Data.Broker],
+                                    ["Inception Date", $filter("date")(Data.InceptionDate, "shortDate")],
+                                    ["Expiry Date", $filter("date")(Data.ExpiryDate, "shortDate")]
+                                ]
+                            }
+                        },
+                        { style: "heading", text: "\nTerritories\n\n" },
+                        {
+                            table: {
+                                widths: [150, "*"],
+                                body: [
+                                    ["Risks Located in", Data.RisksTerritory],
+                                    ["Insureds Domiciled in", Data.DomiciledTerritory],
+                                    ["Territorial Limits", Data.LimitsTerritory]
+                                ]
+                            }
+                        }
+                    ],
+                    styles: {
+                        heading: { fontSize: 18, bold: true }
+                    }
+                };
+                pdfMake.createPdf(doc).open();
+                //pdfMake.createPdf(doc).download(Data.UMR + ".pdf");
+            }
+        });
+        apiBinderPDF.Execute($scope);
+        event.stopPropagation();
+    };
 
 }]);
 

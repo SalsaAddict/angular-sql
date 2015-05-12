@@ -59,6 +59,7 @@
                     <th>Broker</th>
                     <th>Inception</th>
                     <th>Expiry</th>
+                    <th>PDF</th>
                 </tr>
             </thead>
             <tbody>
@@ -75,6 +76,9 @@
                     <td>{{Binder.Broker}}</td>
                     <td>{{Binder.InceptionDate | date : "shortDate"}}</td>
                     <td>{{Binder.ExpiryDate | date : "shortDate"}}</td>
+                    <td ng-click="PDF($event, Binder.BinderId)">
+                        <a href class="text-danger"><i class="fa fa-file-pdf-o"></i> PDF</a>
+                    </td>
                 </tr>
             </tbody>
         </table>

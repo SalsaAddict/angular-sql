@@ -4,6 +4,7 @@ GO
 SET NOCOUNT ON
 GO
 
+IF OBJECT_ID(N'apiBinderPDF', N'P') IS NOT NULL DROP PROCEDURE [apiBinderPDF]
 IF OBJECT_ID(N'apiBinders', N'P') IS NOT NULL DROP PROCEDURE [apiBinders]
 IF OBJECT_ID(N'apiBinderSectionSave', N'P') IS NOT NULL DROP PROCEDURE [apiBinderSectionSave]
 IF OBJECT_ID(N'apiBinderSectionCarrier', N'P') IS NOT NULL DROP PROCEDURE [apiBinderSectionCarrier]
@@ -1416,6 +1417,34 @@ BEGIN
 				 AND bsc.[CarrierId] = @CarrierId
 		 ))
 	ORDER BY cov.[Name], b.[ExpiryDate] DESC, b.[UMR]
+	RETURN
+END
+GO
+
+
+CREATE PROCEDURE [apiBinderPDF](@UserId INT, @BinderId INT)
+AS
+BEGIN
+ SET NOCOUNT ON
+	SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED
+	SELECT
+	 [Reference] = b.[Reference],
+		[UMR] = b.[UMR],
+		[Coverholder] = cov.[Name],
+		[Broker] = lbr.[Name],
+		[InceptionDate] = b.[InceptionDate],
+		[ExpiryDate] = b.[ExpiryDate],
+		[RisksTerritory] = rty.[Name],
+		[DomiciledTerritory] = dty.[Name],
+		[LimitsTerritory] = lty.[Name]
+	FROM [Binder] b
+	 JOIN [Company] cov ON b.[CoverholderId] = cov.[Id]
+		JOIN [Company] lbr ON b.[BrokerId] = lbr.[Id]
+		JOIN [Territory] rty ON b.[RisksTerritoryId] = rty.[Id]
+		JOIN [Territory] dty ON b.[DomiciledTerritoryId] = dty.[Id]
+		JOIN [Territory] lty ON b.[LimitsTerritoryId] = lty.[Id]
+	WHERE b.[Id] = @BinderId
+	FOR XML PATH (N'Binder')
 	RETURN
 END
 GO

@@ -1,7 +1,30 @@
-﻿app.controller("BindersController", ["$scope", "$location", "Procedure", function ($scope, $location, Procedure) {
+﻿app.controller("BindersController", ["$scope", "$location", "$localStorage", "Procedure", function ($scope, $location, $localStorage, Procedure) {
 
-    var apiBinders = new Procedure({ Name: "apiBinders", UserId: true, Type: "array", ngModel: "Binders" });
-    apiBinders.Execute($scope);
+    $scope.$storage = $localStorage.$default({ BinderSearch: { Advanced: false, ClassId: null } });
+
+    var apiBinders = new Procedure({
+        Name: "apiBinders", UserId: true, Type: "array", ngModel: "Binders",
+        Parameters: [
+            { Name: "ClassId", Type: "scope", Value: "$storage.BinderSearch.ClassId" },
+            { Name: "CarrierId", Type: "scope", Value: "$storage.BinderSearch.CarrierId" },
+            { Name: "Date", Type: "scope", Value: "$storage.BinderSearch.Date" },
+            { Name: "CoverholderId", Type: "scope", Value: "$storage.BinderSearch.CoverholderId" }
+        ]
+    });
+    apiBinders.AutoExec($scope);
+
+    $scope.ToggleAdvanced = function () {
+        $scope.$storage.BinderSearch = { Advanced: !$scope.$storage.BinderSearch.Advanced };
+    };
+
+    var apiCoverholders = new Procedure({ Name: "apiBinderCoverholder", UserId: true, Type: "array", ngModel: "Coverholders" });
+    apiCoverholders.Execute($scope);
+
+    var apiCarriers = new Procedure({ Name: "apiBinderSectionCarrier", UserId: true, Type: "array", ngModel: "Carriers", });
+    apiCarriers.Execute($scope);
+
+    var apiClass = new Procedure({ Name: "apiClassOfBusiness", UserId: true, Type: "array", ngModel: "Classes" });
+    apiClass.Execute($scope);
 
     $scope.New = function () { $location.path("/binder"); };
     $scope.View = function (BinderId) { $location.path("/binder/" + BinderId); };

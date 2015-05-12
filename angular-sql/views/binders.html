@@ -5,9 +5,50 @@
                 <h4>Binders</h4>
             </div>
             <div class="col-sm-3">
-                <input type="text" class="form-control" placeholder="Search&hellip;" ng-model="Search" />
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Search&hellip;" ng-model="Search" />
+                    <span class="input-group-btn" title="Advanced Search">
+                        <button class="btn btn-default" ng-click="ToggleAdvanced()">
+                            <i class="fa fa-bullseye"></i>
+                        </button>
+                    </span>
+                </div>
             </div>
         </div>
+    </div>
+    <div class="panel-body" collapse="!$storage.BinderSearch.Advanced">
+        <form class="form-horizontal">
+            <div class="row">
+                <div class="col-sm-6">
+                    <asql-label text="Coverholder">
+                        <select ng-model="$storage.BinderSearch.CoverholderId" ng-options="Coverholder.CoverholderId as Coverholder.Coverholder for Coverholder in Coverholders" asql-control>
+                            <option value=""></option>
+                        </select>
+                    </asql-label>
+                </div>
+                <div class="col-sm-6">
+                    <asql-label text="Carrier">
+                        <select ng-model="$storage.BinderSearch.CarrierId" ng-options="Carrier.CarrierId as Carrier.Carrier for Carrier in Carriers" asql-control>
+                            <option value=""></option>
+                        </select>
+                    </asql-label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <asql-label text="Class">
+                        <select ng-model="$storage.BinderSearch.ClassId" ng-options="Class.Id as Class.Description for Class in Classes" asql-control>
+                            <option value=""></option>
+                        </select>
+                    </asql-label>
+                </div>
+                <div class="col-sm-6">
+                    <asql-label text="Date">
+                        <input type="date" ng-model="$storage.BinderSearch.Date" asql-control />
+                    </asql-label>
+                </div>
+            </div>
+        </form>
     </div>
     <div class="table-responsive">
         <table class="table table-hover">

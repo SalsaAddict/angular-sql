@@ -4,6 +4,7 @@ GO
 SET NOCOUNT ON
 GO
 
+IF OBJECT_ID(N'apiBinders', N'P') IS NOT NULL DROP PROCEDURE [apiBinders]
 IF OBJECT_ID(N'apiBinderSectionSave', N'P') IS NOT NULL DROP PROCEDURE [apiBinderSectionSave]
 IF OBJECT_ID(N'apiBinderSectionCarrier', N'P') IS NOT NULL DROP PROCEDURE [apiBinderSectionCarrier]
 IF OBJECT_ID(N'apiBinderSectionAdministrator', N'P') IS NOT NULL DROP PROCEDURE [apiBinderSectionAdministrator]
@@ -18,7 +19,6 @@ IF OBJECT_ID(N'apiBinderBroker', N'P') IS NOT NULL DROP PROCEDURE [apiBinderBrok
 IF OBJECT_ID(N'apiBinderCoverholder', N'P') IS NOT NULL DROP PROCEDURE [apiBinderCoverholder]
 IF OBJECT_ID(N'apiBinderSave', N'P') IS NOT NULL DROP PROCEDURE [apiBinderSave]
 IF OBJECT_ID(N'apiBinder', N'P') IS NOT NULL DROP PROCEDURE [apiBinder]
-IF OBJECT_ID(N'apiBinders', N'P') IS NOT NULL DROP PROCEDURE [apiBinders]
 IF OBJECT_ID(N'Binder', N'U') IS NOT NULL DROP TABLE [Binder]
 IF OBJECT_ID(N'apiCompanySave', N'P') IS NOT NULL DROP PROCEDURE [apiCompanySave]
 IF OBJECT_ID(N'apiCompanyRoles', N'P') IS NOT NULL DROP PROCEDURE [apiCompanyRoles]
@@ -1005,27 +1005,6 @@ WHERE v.[type] = N'P'
  AND v.[number] BETWEEN 1 AND 500
 GO
 
-CREATE PROCEDURE [apiBinders](@UserId INT)
-AS
-BEGIN
- SET NOCOUNT ON
-	SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED
-	SELECT
-	 [BinderId] = b.[Id],
-		[UMR] = b.[UMR],
-		[Reference] = b.[Reference],
-		[Broker] = lbr.[Name],
-		[Coverholder] = cov.[Name],
-		[InceptionDate] = b.[InceptionDate],
-		[ExpiryDate] = b.[ExpiryDate]
-	FROM [Binder] b
-	 JOIN [Company] lbr ON b.[BrokerId] = lbr.[Id]
-		JOIN [Company] cov ON b.[CoverholderId] = cov.[Id]
-	ORDER BY cov.[Name], b.[ExpiryDate] DESC, b.[UMR]
-	RETURN
-END
-GO
-
 CREATE PROCEDURE [apiBinder](@UserId INT, @BinderId INT)
 AS
 BEGIN
@@ -1398,9 +1377,45 @@ BEGIN
 	WHEN NOT MATCHED BY TARGET THEN
 	 INSERT ([SectionId], [CarrierId], [Index], [Percentage])
 		VALUES ([SectionId], [CarrierId], [Index], [Percentage])
-	WHEN NOT MATCHED BY SOURCE THEN DELETE;
+	WHEN NOT MATCHED BY SOURCE AND t.[SectionId] = @SectionId THEN DELETE;
 
 	EXEC [apiBinderSection] @UserId, @SectionId
+	RETURN
+END
+GO
+
+CREATE PROCEDURE [apiBinders](@UserId INT, @CoverholderId INT = NULL, @CarrierId INT = NULL, @ClassId NVARCHAR(5) = NULL, @Date DATE = NULL)
+AS
+BEGIN
+ SET NOCOUNT ON
+	SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED
+	SELECT
+	 [BinderId] = b.[Id],
+		[UMR] = b.[UMR],
+		[Reference] = b.[Reference],
+		[Broker] = lbr.[Name],
+		[Coverholder] = cov.[Name],
+		[InceptionDate] = b.[InceptionDate],
+		[ExpiryDate] = b.[ExpiryDate]
+	FROM [Binder] b
+	 JOIN [Company] lbr ON b.[BrokerId] = lbr.[Id]
+		JOIN [Company] cov ON b.[CoverholderId] = cov.[Id]
+	WHERE (@CoverholderId IS NULL OR b.[CoverholderId] = @CoverholderId) 
+	 AND (@Date IS NULL OR @Date BETWEEN b.[InceptionDate] AND b.[ExpiryDate])
+		AND (@ClassId IS NULL OR EXISTS (
+		  SELECT 1
+				FROM [BinderSection]
+				WHERE [BinderId] = b.[Id]
+				 AND [ClassId] = @ClassId
+		 ))
+		AND (@CarrierId IS NULL OR EXISTS (
+		  SELECT 1
+				FROM [BinderSection] bs
+				 JOIN [BinderSectionCarrier] bsc ON bs.[Id] = bsc.[SectionId]
+				WHERE bs.[BinderId] = b.[Id]
+				 AND bsc.[CarrierId] = @CarrierId
+		 ))
+	ORDER BY cov.[Name], b.[ExpiryDate] DESC, b.[UMR]
 	RETURN
 END
 GO

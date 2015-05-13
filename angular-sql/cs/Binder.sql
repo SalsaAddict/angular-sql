@@ -1427,16 +1427,30 @@ AS
 BEGIN
  SET NOCOUNT ON
 	SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED
+	;WITH XMLNAMESPACES ('http://james.newtonking.com/projects/json' AS [json])
 	SELECT
 	 [Reference] = b.[Reference],
 		[UMR] = b.[UMR],
-		[Coverholder] = cov.[Name],
-		[Broker] = lbr.[Name],
+		[Coverholder] = cov.[DisplayName],
+		[Broker] = lbr.[DisplayName],
 		[InceptionDate] = b.[InceptionDate],
 		[ExpiryDate] = b.[ExpiryDate],
 		[RisksTerritory] = rty.[Name],
 		[DomiciledTerritory] = dty.[Name],
-		[LimitsTerritory] = lty.[Name]
+		[LimitsTerritory] = lty.[Name],
+		(
+		  SELECT
+				 [@json:Array] = N'true',
+					[Title] = bs.[Title],
+					[Class] = cob.[Description],
+					[TPA] = tpa.[DisplayName]
+				FROM [BinderSection] bs
+				 JOIN [ClassOfBusiness] cob ON bs.[ClassId] = cob.[Id]
+					JOIN [Company] tpa ON bs.[AdministratorId] = tpa.[Id]
+				WHERE bs.[BinderId] = b.[Id]
+				ORDER BY bs.[Title]
+				FOR XML PATH (N'Sections'), TYPE
+		 )
 	FROM [Binder] b
 	 JOIN [Company] cov ON b.[CoverholderId] = cov.[Id]
 		JOIN [Company] lbr ON b.[BrokerId] = lbr.[Id]

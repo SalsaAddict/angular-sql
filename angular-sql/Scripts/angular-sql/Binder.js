@@ -46,15 +46,7 @@
                                     ["Coverholder", Data.Coverholder],
                                     ["Lloyd's Broker", Data.Broker],
                                     ["Inception Date", $filter("date")(Data.InceptionDate, "shortDate")],
-                                    ["Expiry Date", $filter("date")(Data.ExpiryDate, "shortDate")]
-                                ]
-                            }
-                        },
-                        { style: "heading", text: "\nTerritories\n\n" },
-                        {
-                            table: {
-                                widths: [150, "*"],
-                                body: [
+                                    ["Expiry Date", $filter("date")(Data.ExpiryDate, "shortDate")],
                                     ["Risks Located in", Data.RisksTerritory],
                                     ["Insureds Domiciled in", Data.DomiciledTerritory],
                                     ["Territorial Limits", Data.LimitsTerritory]
@@ -63,9 +55,30 @@
                         }
                     ],
                     styles: {
-                        heading: { fontSize: 18, bold: true }
+                        heading: { fontSize: 12, bold: true }
+                    },
+                    defaultStyle: {
+                        fontSize: 9
                     }
                 };
+                angular.forEach(Data.Sections, function (SectionData) {
+                    doc.content.push({ style: "heading", text: "\n" + SectionData.Title + "\n\n" });
+                    doc.content.push({
+                        table: {
+                            widths: [150, "*"],
+                            body: [
+                                ["Class of Business", SectionData.Class],
+                                ["TPA", SectionData.TPA]
+                            ]
+                        },
+                    });
+                    doc.content.push("\n");
+                    var CarrierTable = { table: { widths: [150, "*", 50], body: [] } };
+                    angular.forEach(SectionData.Carriers, function (CarrierData) {
+                        CarrierTable.table.body.push(["Carrier", CarrierData.Carrier, $filter("number")(CarrierData.Percentage * 100, 2) + "%"]);
+                    });
+                    doc.content.push(CarrierTable);
+                });
                 pdfMake.createPdf(doc).open();
                 //pdfMake.createPdf(doc).download(Data.UMR + ".pdf");
             }

@@ -1,10 +1,91 @@
-﻿app.controller("BindersController", ["$scope", "$location", "Procedure", function ($scope, $location, Procedure) {
+﻿app.controller("BindersController", ["$scope", "$location", "$localStorage", "$filter", "Procedure", function ($scope, $location, $localStorage, $filter, Procedure) {
 
-    var apiBinders = new Procedure({ Name: "apiBinders", UserId: true, Type: "array", ngModel: "Binders" });
-    apiBinders.Execute($scope);
+    $scope.$storage = $localStorage.$default({ BinderSearch: { Advanced: false, ClassId: null } });
+
+    var apiBinders = new Procedure({
+        Name: "apiBinders", UserId: true, Type: "array", ngModel: "Binders",
+        Parameters: [
+            { Name: "ClassId", Type: "scope", Value: "$storage.BinderSearch.ClassId" },
+            { Name: "CarrierId", Type: "scope", Value: "$storage.BinderSearch.CarrierId" },
+            { Name: "Date", Type: "scope", Value: "$storage.BinderSearch.Date" },
+            { Name: "CoverholderId", Type: "scope", Value: "$storage.BinderSearch.CoverholderId" }
+        ]
+    });
+    apiBinders.AutoExec($scope);
+
+    $scope.ToggleAdvanced = function () {
+        $scope.$storage.BinderSearch = { Advanced: !$scope.$storage.BinderSearch.Advanced };
+    };
+
+    var apiCoverholders = new Procedure({ Name: "apiBinderCoverholder", UserId: true, Type: "array", ngModel: "Coverholders" });
+    apiCoverholders.Execute($scope);
+
+    var apiCarriers = new Procedure({ Name: "apiBinderSectionCarrier", UserId: true, Type: "array", ngModel: "Carriers", });
+    apiCarriers.Execute($scope);
+
+    var apiClass = new Procedure({ Name: "apiClassOfBusiness", UserId: true, Type: "array", ngModel: "Classes" });
+    apiClass.Execute($scope);
 
     $scope.New = function () { $location.path("/binder"); };
     $scope.View = function (BinderId) { $location.path("/binder/" + BinderId); };
+
+    $scope.PDF = function (event, BinderId) {
+        var apiBinderPDF = new Procedure({
+            Name: "apiBinderPDF", UserId: true, Type: "object", Root: "Binder",
+            Parameters: [{ Name: "BinderId", Type: "value", Value: BinderId }],
+            Success: function (Data) {
+                var doc = {
+                    content: [
+                        { style: "heading", text: "Binder Details\n\n" },
+                        {
+                            table: {
+                                widths: [150, "*"],
+                                body: [
+                                    ["Agreement Number", Data.Reference],
+                                    ["Unique Market Reference", Data.UMR],
+                                    ["Coverholder", Data.Coverholder],
+                                    ["Lloyd's Broker", Data.Broker],
+                                    ["Inception Date", $filter("date")(Data.InceptionDate, "shortDate")],
+                                    ["Expiry Date", $filter("date")(Data.ExpiryDate, "shortDate")],
+                                    ["Risks Located in", Data.RisksTerritory],
+                                    ["Insureds Domiciled in", Data.DomiciledTerritory],
+                                    ["Territorial Limits", Data.LimitsTerritory]
+                                ]
+                            }
+                        }
+                    ],
+                    styles: {
+                        heading: { fontSize: 12, bold: true }
+                    },
+                    defaultStyle: {
+                        fontSize: 9
+                    }
+                };
+                angular.forEach(Data.Sections, function (SectionData) {
+                    doc.content.push({ style: "heading", text: "\n" + SectionData.Title + "\n\n" });
+                    doc.content.push({
+                        table: {
+                            widths: [150, "*"],
+                            body: [
+                                ["Class of Business", SectionData.Class],
+                                ["TPA", SectionData.TPA]
+                            ]
+                        },
+                    });
+                    doc.content.push("\n");
+                    var CarrierTable = { table: { widths: [150, "*", 50], body: [] } };
+                    angular.forEach(SectionData.Carriers, function (CarrierData) {
+                        CarrierTable.table.body.push(["Carrier", CarrierData.Carrier, $filter("number")(CarrierData.Percentage * 100, 2) + "%"]);
+                    });
+                    doc.content.push(CarrierTable);
+                });
+                pdfMake.createPdf(doc).open();
+                //pdfMake.createPdf(doc).download(Data.UMR + ".pdf");
+            }
+        });
+        apiBinderPDF.Execute($scope);
+        event.stopPropagation();
+    };
 
 }]);
 

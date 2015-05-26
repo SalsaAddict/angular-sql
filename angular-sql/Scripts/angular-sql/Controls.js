@@ -40,11 +40,11 @@
 app.directive("asqlSubForm", [function () {
     return {
         restrict: "A",
-        require: ["form", "^^asqlForm"],
+        require: ["form", "^^?asqlForm"],
         scope: true,
         link: function (scope, iElement, iAttrs, controller) {
             iElement.attr("novalidate", true);
-            scope.formDirty = function () { return controller[1].formDirty(); };
+            scope.formDirty = function () { return (controller[1]) ? controller[1].formDirty() : false; };
             scope.hasError = function () { return scope.formDirty() && controller[0].$invalid; };
         }
     };
@@ -62,12 +62,12 @@ app.directive("asqlLabel", [function () {
 app.directive("asqlControl", ["$filter", function ($filter) {
     return {
         restrict: "A",
-        require: ["^^asqlForm", "ngModel"],
+        require: ["^^?asqlForm", "ngModel"],
         link: function (scope, iElement, iAttrs, controller) {
             if (!iElement.hasClass("form-control") && iElement.prop("type") !== "checkbox") iElement.addClass("form-control");
             if (iElement.prop("type") === "date") {
                 controller[1].$formatters.push(function (modelValue) { return new Date(modelValue); });
-                controller[1].$parsers.push(function (modelValue) { return $filter("date")(new Date(modelValue), "yyyy-MM-dd"); });
+                controller[1].$parsers.push(function (modelValue) { return (modelValue) ? $filter("date")(new Date(modelValue), "yyyy-MM-dd") : null; });
             };
             if (iAttrs["asqlControl"]) {
                 switch (angular.lowercase(iAttrs["asqlControl"])) {
@@ -77,8 +77,7 @@ app.directive("asqlControl", ["$filter", function ($filter) {
                         break;
                 };
             };
-            if (!controller[0].canEdit()) iElement.attr("disabled", true);
-
+            if (controller[0]) { if (!controller[0].canEdit()) iElement.attr("disabled", true); };
         }
     };
 }]);

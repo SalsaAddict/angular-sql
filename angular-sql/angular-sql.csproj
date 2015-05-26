@@ -82,6 +82,8 @@
     <Content Include="packages.config" />
     <Content Include="scripts\angular-route.min.js.map" />
     <Content Include="exec.ashx" />
+    <Content Include="scripts\pdfmake\pdfmake.min.js.map" />
+    <None Include="Properties\PublishProfiles\Amazon.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -130,6 +132,8 @@
     <Content Include="scripts\jquery-1.9.1.js" />
     <Content Include="scripts\jquery-1.9.1.min.js" />
     <Content Include="scripts\npm.js" />
+    <Content Include="scripts\pdfmake\pdfmake.min.js" />
+    <Content Include="scripts\pdfmake\vfs_fonts.js" />
     <Content Include="views\binder.html" />
     <Content Include="views\binders.html" />
     <Content Include="views\bindersection.html" />
